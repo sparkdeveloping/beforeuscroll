@@ -16,3 +16,11 @@ web/dist/
 web/.vercel/
 web/.env.local
 web/.env*.local
+
+web/node_modules/
+web/.next/
+web/out/
+web/dist/
+web/.vercel/
+web/.env.local
+web/.env*.local
