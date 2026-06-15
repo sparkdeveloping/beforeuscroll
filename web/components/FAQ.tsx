@@ -13,7 +13,7 @@ const faqs = [
   },
   {
     q: 'Is this a Bible quiz app?',
-    a: 'No. The questions are there to help you remember Scripture before you enter apps designed to pull your attention away.'
+    a: 'No. The questions are there to help you remember Scripture before you enter apps designed to pull your attention away'
   }
 ];
 
