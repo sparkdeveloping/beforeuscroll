@@ -1,37 +1,31 @@
 import SwiftUI
 
 enum BYSTheme {
-    static let background = Color(hex: "#05070D")
-    static let backgroundDeep = Color(hex: "#02030A")
-    static let card = Color.white.opacity(0.075)
-    static let cardStrong = Color.white.opacity(0.12)
+    // Backgrounds
+    static let background = Color(hex: "#100B18") // Deep Midnight/Plum-Black
+    static let backgroundDeep = Color(hex: "#0D0F14")
+    static let surface = Color(hex: "#1A1424") // Surface Dark
+    
+    // Accents
+    static let ember = Color(hex: "#FF6A3D")
+    static let gold = Color(hex: "#FFB86B") // Flame Gold
+    static let peach = Color(hex: "#FFD6A3") // Soft Peach
+    static let violet = Color(hex: "#7C4DFF")
+    
+    // Text
+    static let text = Color(hex: "#FDFBF7") // Warm Ivory
+    static let textMuted = Color(hex: "#FDFBF7").opacity(0.68)
+    static let textFaint = Color(hex: "#FDFBF7").opacity(0.42)
+    
     static let border = Color.white.opacity(0.12)
-
-    static let text = Color.white
-    static let textMuted = Color.white.opacity(0.68)
-    static let textFaint = Color.white.opacity(0.42)
-
-    static let gold = Color(hex: "#F7C873")
-    static let goldDeep = Color(hex: "#A76D24")
-    static let blue = Color(hex: "#7DD3FC")
-    static let purple = Color(hex: "#C4B5FD")
     static let green = Color(hex: "#86EFAC")
     static let red = Color(hex: "#FCA5A5")
 
-    static let gradient = LinearGradient(
-        colors: [
-            Color(hex: "#172554"),
-            Color(hex: "#312E81"),
-            Color(hex: "#713F12")
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-
     static let warmGradient = LinearGradient(
         colors: [
-            Color(hex: "#F7C873"),
-            Color(hex: "#F59E0B")
+            Color(hex: "#FFD6A3"),
+            Color(hex: "#FFB86B"),
+            Color(hex: "#FF6A3D")
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing

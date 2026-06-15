@@ -16,7 +16,6 @@ struct beforeuscrollApp: App {
         WindowGroup {
             AppRootView()
                 .environmentObject(appState)
-                .preferredColorScheme(.dark)
                 .onOpenURL { url in
                     appState.handleDeepLink(url)
                 }

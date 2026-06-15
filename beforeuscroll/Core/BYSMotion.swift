@@ -9,6 +9,7 @@ enum BYSMotion {
     static let quickSpring = Animation.spring(response: 0.28, dampingFraction: 0.78)
     static let successSpring = Animation.spring(response: 0.34, dampingFraction: 0.62)
     static let gentleEase = Animation.easeInOut(duration: 0.32)
+    static let parallaxSpring = Animation.spring(response: 0.45, dampingFraction: 0.82)
 
     static func state(_ animation: Animation, reduceMotion: Bool) -> Animation {
         reduceMotion ? .easeInOut(duration: 0.16) : animation
@@ -37,6 +38,18 @@ enum BYSHaptics {
     static func warning() {
         #if canImport(UIKit)
         UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        #endif
+    }
+    
+    static func rigid() {
+        #if canImport(UIKit)
+        UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+        #endif
+    }
+    
+    static func soft() {
+        #if canImport(UIKit)
+        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
         #endif
     }
 }
@@ -96,8 +109,8 @@ struct ParallaxTiltModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .rotation3DEffect(.degrees(reduceMotion ? 0 : Double(dragOffset.height / 18).clamped(to: -maxTilt...maxTilt)), axis: (x: 1, y: 0, z: 0))
-            .rotation3DEffect(.degrees(reduceMotion ? 0 : Double(-dragOffset.width / 18).clamped(to: -maxTilt...maxTilt)), axis: (x: 0, y: 1, z: 0))
+            .rotation3DEffect(.degrees(reduceMotion ? 0 : Double(dragOffset.height / 18).bys_clamped(to: -maxTilt...maxTilt)), axis: (x: 1, y: 0, z: 0))
+            .rotation3DEffect(.degrees(reduceMotion ? 0 : Double(-dragOffset.width / 18).bys_clamped(to: -maxTilt...maxTilt)), axis: (x: 0, y: 1, z: 0))
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -155,7 +168,7 @@ extension View {
 }
 
 private extension Comparable {
-    func clamped(to range: ClosedRange<Self>) -> Self {
+    func bys_clamped(to range: ClosedRange<Self>) -> Self {
         min(max(self, range.lowerBound), range.upperBound)
     }
 }

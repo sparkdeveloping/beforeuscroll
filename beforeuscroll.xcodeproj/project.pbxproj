@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		26619C2D2FDF3B5B00490F38 /* BYSFocusFlameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C2C2FDF3B5B00490F38 /* BYSFocusFlameStore.swift */; };
+		26619C2E2FDF3B5B00490F38 /* BYSFocusFlameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C2C2FDF3B5B00490F38 /* BYSFocusFlameStore.swift */; };
+		26619C2F2FDF3B5B00490F38 /* BYSFocusFlameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C2C2FDF3B5B00490F38 /* BYSFocusFlameStore.swift */; };
+		26619C302FDF3B5B00490F38 /* BYSFocusFlameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C2C2FDF3B5B00490F38 /* BYSFocusFlameStore.swift */; };
+		26619C3F2FDF645A00490F38 /* LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C3E2FDF645A00490F38 /* LocalStore.swift */; };
+		26619C402FDF645A00490F38 /* LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C3E2FDF645A00490F38 /* LocalStore.swift */; };
+		26619C412FDF645A00490F38 /* LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C3E2FDF645A00490F38 /* LocalStore.swift */; };
+		26619C422FDF645A00490F38 /* LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C3E2FDF645A00490F38 /* LocalStore.swift */; };
+		26619C442FDF645B00490F38 /* BYSStatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C432FDF645B00490F38 /* BYSStatsStore.swift */; };
+		26619C452FDF645B00490F38 /* BYSStatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C432FDF645B00490F38 /* BYSStatsStore.swift */; };
+		26619C462FDF645B00490F38 /* BYSStatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C432FDF645B00490F38 /* BYSStatsStore.swift */; };
+		26619C472FDF645B00490F38 /* BYSStatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26619C432FDF645B00490F38 /* BYSStatsStore.swift */; };
 		26DC6B712FBE53110070CA3E /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26DC6B702FBE53110070CA3E /* ManagedSettings.framework */; };
 		26DC6B732FBE53110070CA3E /* ManagedSettingsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26DC6B722FBE53110070CA3E /* ManagedSettingsUI.framework */; };
 		26DC6B7B2FBE53110070CA3E /* shieldconfiguration.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 26DC6B6E2FBE53110070CA3E /* shieldconfiguration.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -74,7 +86,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		26DC6B242FBE50280070CA3E /* beforeyouscroll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = beforeyouscroll.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		26619C2C2FDF3B5B00490F38 /* BYSFocusFlameStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BYSFocusFlameStore.swift; sourceTree = "<group>"; };
+		26619C3E2FDF645A00490F38 /* LocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStore.swift; sourceTree = "<group>"; };
+		26619C432FDF645B00490F38 /* BYSStatsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BYSStatsStore.swift; sourceTree = "<group>"; };
+		26DC6B242FBE50280070CA3E /* beforeuscroll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = beforeuscroll.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		26DC6B6E2FBE53110070CA3E /* shieldconfiguration.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = shieldconfiguration.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		26DC6B702FBE53110070CA3E /* ManagedSettings.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettings.framework; path = System/Library/Frameworks/ManagedSettings.framework; sourceTree = SDKROOT; };
 		26DC6B722FBE53110070CA3E /* ManagedSettingsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettingsUI.framework; path = System/Library/Frameworks/ManagedSettingsUI.framework; sourceTree = SDKROOT; };
@@ -110,22 +125,22 @@
 			);
 			target = 26DC6B962FBE53560070CA3E /* deviceactivitymonitor */;
 		};
-		26DC6BBD2FBE56E70070CA3E /* Exceptions for "beforeyouscroll" folder in "beforeyouscroll" target */ = {
+		26DC6BBD2FBE56E70070CA3E /* Exceptions for "beforeuscroll" folder in "beforeuscroll" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 26DC6B232FBE50280070CA3E /* beforeyouscroll */;
+			target = 26DC6B232FBE50280070CA3E /* beforeuscroll */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		26DC6B262FBE50280070CA3E /* beforeyouscroll */ = {
+		26DC6B262FBE50280070CA3E /* beforeuscroll */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				26DC6BBD2FBE56E70070CA3E /* Exceptions for "beforeyouscroll" folder in "beforeyouscroll" target */,
+				26DC6BBD2FBE56E70070CA3E /* Exceptions for "beforeuscroll" folder in "beforeuscroll" target */,
 			);
-			path = beforeyouscroll;
+			path = beforeuscroll;
 			sourceTree = "<group>";
 		};
 		26DC6B742FBE53110070CA3E /* shieldconfiguration */ = {
@@ -195,7 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				26DC6BA72FBE55F60070CA3E /* Shared */,
-				26DC6B262FBE50280070CA3E /* beforeyouscroll */,
+				26DC6B262FBE50280070CA3E /* beforeuscroll */,
 				26DC6B742FBE53110070CA3E /* shieldconfiguration */,
 				26DC6B872FBE53280070CA3E /* shieldaction */,
 				26DC6B9A2FBE53560070CA3E /* deviceactivitymonitor */,
@@ -207,7 +222,7 @@
 		26DC6B252FBE50280070CA3E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				26DC6B242FBE50280070CA3E /* beforeyouscroll.app */,
+				26DC6B242FBE50280070CA3E /* beforeuscroll.app */,
 				26DC6B6E2FBE53110070CA3E /* shieldconfiguration.appex */,
 				26DC6B852FBE53280070CA3E /* shieldaction.appex */,
 				26DC6B972FBE53560070CA3E /* deviceactivitymonitor.appex */,
@@ -233,6 +248,9 @@
 				26DC6BA92FBE56020070CA3E /* BYSSelectionStore.swift */,
 				26DC6BAA2FBE56020070CA3E /* BYSShieldActionStore.swift */,
 				26DC6BAB2FBE56020070CA3E /* BYSUnlockStore.swift */,
+				26619C2C2FDF3B5B00490F38 /* BYSFocusFlameStore.swift */,
+				26619C3E2FDF645A00490F38 /* LocalStore.swift */,
+				26619C432FDF645B00490F38 /* BYSStatsStore.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -240,9 +258,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		26DC6B232FBE50280070CA3E /* beforeyouscroll */ = {
+		26DC6B232FBE50280070CA3E /* beforeuscroll */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 26DC6B2F2FBE502B0070CA3E /* Build configuration list for PBXNativeTarget "beforeyouscroll" */;
+			buildConfigurationList = 26DC6B2F2FBE502B0070CA3E /* Build configuration list for PBXNativeTarget "beforeuscroll" */;
 			buildPhases = (
 				26DC6B202FBE50280070CA3E /* Sources */,
 				26DC6B212FBE50280070CA3E /* Frameworks */,
@@ -257,13 +275,13 @@
 				26DC6BA02FBE53560070CA3E /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				26DC6B262FBE50280070CA3E /* beforeyouscroll */,
+				26DC6B262FBE50280070CA3E /* beforeuscroll */,
 			);
-			name = beforeyouscroll;
+			name = beforeuscroll;
 			packageProductDependencies = (
 			);
-			productName = beforeyouscroll;
-			productReference = 26DC6B242FBE50280070CA3E /* beforeyouscroll.app */;
+			productName = beforeuscroll;
+			productReference = 26DC6B242FBE50280070CA3E /* beforeuscroll.app */;
 			productType = "com.apple.product-type.application";
 		};
 		26DC6B6D2FBE53110070CA3E /* shieldconfiguration */ = {
@@ -356,7 +374,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 26DC6B1F2FBE50280070CA3E /* Build configuration list for PBXProject "beforeyouscroll" */;
+			buildConfigurationList = 26DC6B1F2FBE50280070CA3E /* Build configuration list for PBXProject "beforeuscroll" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -370,7 +388,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				26DC6B232FBE50280070CA3E /* beforeyouscroll */,
+				26DC6B232FBE50280070CA3E /* beforeuscroll */,
 				26DC6B6D2FBE53110070CA3E /* shieldconfiguration */,
 				26DC6B842FBE53280070CA3E /* shieldaction */,
 				26DC6B962FBE53560070CA3E /* deviceactivitymonitor */,
@@ -414,6 +432,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26619C442FDF645B00490F38 /* BYSStatsStore.swift in Sources */,
+				26619C402FDF645A00490F38 /* LocalStore.swift in Sources */,
+				26619C2D2FDF3B5B00490F38 /* BYSFocusFlameStore.swift in Sources */,
 				26DC6BB02FBE56020070CA3E /* BYSShieldActionStore.swift in Sources */,
 				26DC6BB12FBE56020070CA3E /* BYSUnlockStore.swift in Sources */,
 				26DC6BB22FBE56020070CA3E /* BYSSelectionStore.swift in Sources */,
@@ -425,8 +446,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26619C472FDF645B00490F38 /* BYSStatsStore.swift in Sources */,
 				26DC6BAC2FBE56020070CA3E /* BYSShieldActionStore.swift in Sources */,
+				26619C412FDF645A00490F38 /* LocalStore.swift in Sources */,
 				26DC6BAD2FBE56020070CA3E /* BYSUnlockStore.swift in Sources */,
+				26619C2F2FDF3B5B00490F38 /* BYSFocusFlameStore.swift in Sources */,
 				26DC6BAE2FBE56020070CA3E /* BYSSelectionStore.swift in Sources */,
 				26DC6BAF2FBE56020070CA3E /* BYSAppGroup.swift in Sources */,
 			);
@@ -436,9 +460,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26619C462FDF645B00490F38 /* BYSStatsStore.swift in Sources */,
 				26DC6BB42FBE56020070CA3E /* BYSShieldActionStore.swift in Sources */,
+				26619C422FDF645A00490F38 /* LocalStore.swift in Sources */,
 				26DC6BB52FBE56020070CA3E /* BYSUnlockStore.swift in Sources */,
 				26DC6BB62FBE56020070CA3E /* BYSSelectionStore.swift in Sources */,
+				26619C2E2FDF3B5B00490F38 /* BYSFocusFlameStore.swift in Sources */,
 				26DC6BB72FBE56020070CA3E /* BYSAppGroup.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -447,8 +474,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26619C452FDF645B00490F38 /* BYSStatsStore.swift in Sources */,
 				26DC6BB82FBE56020070CA3E /* BYSShieldActionStore.swift in Sources */,
+				26619C3F2FDF645A00490F38 /* LocalStore.swift in Sources */,
 				26DC6BB92FBE56020070CA3E /* BYSUnlockStore.swift in Sources */,
+				26619C302FDF3B5B00490F38 /* BYSFocusFlameStore.swift in Sources */,
 				26DC6BBA2FBE56020070CA3E /* BYSSelectionStore.swift in Sources */,
 				26DC6BBB2FBE56020070CA3E /* BYSAppGroup.swift in Sources */,
 			);
@@ -601,19 +631,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = beforeyouscroll/beforeuscroll.entitlements;
+				CODE_SIGN_ENTITLEMENTS = beforeuscroll/beforeuscroll.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K48G99PWNM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = beforeuscroll/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BeforeUScroll;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -636,19 +668,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = beforeyouscroll/beforeuscroll.entitlements;
+				CODE_SIGN_ENTITLEMENTS = beforeuscroll/beforeuscroll.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K48G99PWNM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = beforeuscroll/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BeforeUScroll;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -684,7 +718,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeyouscroll.shieldconfiguration;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.shieldconfiguration;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -714,7 +748,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeyouscroll.shieldconfiguration;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.shieldconfiguration;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -744,7 +778,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeyouscroll.shieldaction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.shieldaction;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -774,7 +808,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeyouscroll.shieldaction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.shieldaction;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -804,7 +838,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeyouscroll.deviceactivitymonitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.deviceactivitymonitor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -834,7 +868,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeyouscroll.deviceactivitymonitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.deviceactivitymonitor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -849,7 +883,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		26DC6B1F2FBE50280070CA3E /* Build configuration list for PBXProject "beforeyouscroll" */ = {
+		26DC6B1F2FBE50280070CA3E /* Build configuration list for PBXProject "beforeuscroll" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				26DC6B2D2FBE502B0070CA3E /* Debug */,
@@ -858,7 +892,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		26DC6B2F2FBE502B0070CA3E /* Build configuration list for PBXNativeTarget "beforeyouscroll" */ = {
+		26DC6B2F2FBE502B0070CA3E /* Build configuration list for PBXNativeTarget "beforeuscroll" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				26DC6B302FBE502B0070CA3E /* Debug */,

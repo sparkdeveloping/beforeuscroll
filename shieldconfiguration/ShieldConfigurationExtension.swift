@@ -34,17 +34,17 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         ShieldConfiguration(
             backgroundBlurStyle: .systemUltraThinMaterialDark,
             backgroundColor: Self.backgroundColor,
-            icon: Self.pauseBadgeIcon(),
+            icon: UIImage(named: "Icon") ?? Self.pauseBadgeIcon(),
             title: ShieldConfiguration.Label(
-                text: "Before you scroll…",
+                text: "Your Flame is out.",
                 color: .white
             ),
             subtitle: ShieldConfiguration.Label(
-                text: "Prepare your pause, then open BeforeUScroll.",
+                text: "Open BeforeUScroll to recharge before the scroll gets you.",
                 color: Self.subtitleColor
             ),
             primaryButtonLabel: ShieldConfiguration.Label(
-                text: "Prepare Pause",
+                text: "Prepare Recharge",
                 color: Self.primaryTextColor
             ),
             primaryButtonBackgroundColor: Self.goldColor,
@@ -108,13 +108,16 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             UIBezierPath(ovalIn: rect.insetBy(dx: 24, dy: 24)).fill()
 
             primaryTextColor.setFill()
-            let barWidth: CGFloat = 8
-            let barHeight: CGFloat = 30
-            let barY = (size.height - barHeight) / 2
-            let leftBar = CGRect(x: 38, y: barY, width: barWidth, height: barHeight)
-            let rightBar = CGRect(x: 50, y: barY, width: barWidth, height: barHeight)
-            UIBezierPath(roundedRect: leftBar, cornerRadius: 3).fill()
-            UIBezierPath(roundedRect: rightBar, cornerRadius: 3).fill()
+            // Draw a simple flame silhouette
+            let flamePath = UIBezierPath()
+            let centerX = size.width / 2
+            let centerY = size.height / 2 + 5
+            flamePath.move(to: CGPoint(x: centerX, y: centerY - 15))
+            flamePath.addCurve(to: CGPoint(x: centerX + 10, y: centerY + 5), controlPoint1: CGPoint(x: centerX + 5, y: centerY - 10), controlPoint2: CGPoint(x: centerX + 12, y: centerY - 5))
+            flamePath.addCurve(to: CGPoint(x: centerX, y: centerY + 15), controlPoint1: CGPoint(x: centerX + 8, y: centerY + 12), controlPoint2: CGPoint(x: centerX + 5, y: centerY + 15))
+            flamePath.addCurve(to: CGPoint(x: centerX - 10, y: centerY + 5), controlPoint1: CGPoint(x: centerX - 5, y: centerY + 15), controlPoint2: CGPoint(x: centerX - 8, y: centerY + 12))
+            flamePath.addCurve(to: CGPoint(x: centerX, y: centerY - 15), controlPoint1: CGPoint(x: centerX - 12, y: centerY - 5), controlPoint2: CGPoint(x: centerX - 5, y: centerY - 10))
+            flamePath.fill()
         }
 
         return image.withRenderingMode(.alwaysOriginal)

@@ -32,6 +32,8 @@ final class ScreenTimeService: ObservableObject {
     @Published private(set) var shieldCurrentlyApplied: Bool
     @Published private(set) var unlockEndDate: Date?
     @Published private(set) var remainingUnlockSeconds: Int
+    @Published var isWebGuardEnabled: Bool = false
+    @Published var isAdultFilterEnabled: Bool = false
 
     var isTemporarilyUnlocked: Bool {
         remainingUnlockSeconds > 0
@@ -42,6 +44,10 @@ final class ScreenTimeService: ObservableObject {
         self.shieldCurrentlyApplied = BYSUnlockStore.loadShieldCurrentlyApplied()
         self.unlockEndDate = BYSUnlockStore.loadUnlockEndDate()
         self.remainingUnlockSeconds = BYSUnlockStore.remainingSeconds()
+        
+        let loadedSettings = LocalStore.load(UserSettings.self, for: .settings) ?? .default
+        self.isWebGuardEnabled = loadedSettings.isWebGuardEnabled
+        self.isAdultFilterEnabled = loadedSettings.isAdultFilterEnabled
 
         #if canImport(FamilyControls)
         let loadedSelection = BYSSelectionStore.load()
@@ -59,21 +65,24 @@ final class ScreenTimeService: ObservableObject {
 
     func refreshAuthorizationStatus() {
         #if canImport(FamilyControls)
-        isScreenTimeAuthorized = AuthorizationCenter.shared.authorizationStatus == .approved
+        let status = AuthorizationCenter.shared.authorizationStatus
+        isScreenTimeAuthorized = status == .approved
+        debugLog("refreshAuthorizationStatus: status=\(status) isAuthorized=\(isScreenTimeAuthorized)")
         #endif
         refreshPublishedProtectionState()
-        debugLogState("authorization refreshed")
     }
 
     func requestAuthorization() async -> Bool {
         #if canImport(FamilyControls)
+        debugLog("requestAuthorization: starting request")
         do {
             try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
             refreshAuthorizationStatus()
+            debugLog("requestAuthorization: finished, isAuthorized=\(isScreenTimeAuthorized)")
             return isScreenTimeAuthorized
         } catch {
+            debugLog("requestAuthorization: failed error=\(error)")
             refreshAuthorizationStatus()
-            debugLog("authorization failed: \(error)")
             return false
         }
         #else
@@ -106,7 +115,7 @@ final class ScreenTimeService: ObservableObject {
 
         guard !isTemporarilyUnlocked else {
             await clearShield(userDisabled: false)
-            debugLog("applyShield skipped: temporarily unlocked")
+            debugLog("applyShield skipped: Focus Flame active")
             return
         }
 
@@ -138,11 +147,14 @@ final class ScreenTimeService: ObservableObject {
     }
 
     func temporarilyUnlock(minutes: Int) async {
-        let unlockMinutes = max(minutes, 1)
-        let seconds = unlockMinutes * 60
-        let endDate = Date().addingTimeInterval(TimeInterval(seconds))
+        await startIntentionalTime(seconds: max(minutes, 1) * 60)
+    }
+
+    func startIntentionalTime(seconds: Int) async {
+        let activeSeconds = max(seconds, 60)
+        let endDate = Date().addingTimeInterval(TimeInterval(activeSeconds))
         BYSUnlockStore.saveDesiredProtectionEnabled(true)
-        BYSUnlockStore.saveUnlockDurationMinutes(unlockMinutes)
+        BYSUnlockStore.saveUnlockDurationMinutes(max(1, Int(ceil(Double(activeSeconds) / 60.0))))
         BYSUnlockStore.saveUnlockEndDate(endDate)
         refreshPublishedProtectionState()
 
@@ -150,7 +162,7 @@ final class ScreenTimeService: ObservableObject {
         startRelockMonitor(endingAt: endDate)
 
         Task { [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: UInt64(activeSeconds) * 1_000_000_000)
             await self?.reconcileShieldState()
         }
     }
@@ -176,21 +188,29 @@ final class ScreenTimeService: ObservableObject {
 
     func handleSelectionChangedOrPickerDismissed() async {
         #if canImport(FamilyControls)
+        debugLog("handleSelectionChangedOrPickerDismissed: starting")
         BYSSelectionStore.save(selection)
         currentSelectionCount = BYSSelectionStore.selectionTotalCount(selection)
         refreshAuthorizationStatus()
+        debugLog("handleSelectionChangedOrPickerDismissed: selectionCount=\(currentSelectionCount) authorized=\(isScreenTimeAuthorized)")
 
         guard currentSelectionCount > 0 else {
-            debugLog("picker dismissed: no selection")
+            debugLog("picker dismissed: no selection, clearing shields")
+            await clearShield(userDisabled: false)
             await reconcileShieldState()
             return
         }
 
         BYSUnlockStore.saveDesiredProtectionEnabled(true)
-        BYSUnlockStore.clearUnlockEndDate()
-        stopRelockMonitor()
+        // Only clear unlock if we are setting up for the first time or if it's expired
+        if BYSUnlockStore.remainingSeconds() <= 0 {
+            BYSUnlockStore.clearUnlockEndDate()
+            stopRelockMonitor()
+        }
+        
         refreshPublishedProtectionState()
         await applyShield()
+        debugLog("handleSelectionChangedOrPickerDismissed: finished")
         #endif
     }
 
@@ -198,6 +218,15 @@ final class ScreenTimeService: ObservableObject {
         refreshAuthorizationStatus()
         refreshPublishedProtectionState()
         debugLogState("reconcile called")
+        
+        // Reconcile Web Guard (Persistent filtering)
+        #if canImport(FamilyControls)
+        if isWebGuardEnabled && isAdultFilterEnabled && isScreenTimeAuthorized {
+            store.webContent.blockedByFilter = .auto()
+        } else {
+            store.webContent.blockedByFilter = nil
+        }
+        #endif
 
         if isTemporarilyUnlocked {
             debugLog("reconcile: temporarily unlocked, clearing current shield")

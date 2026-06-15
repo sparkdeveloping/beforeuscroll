@@ -5,6 +5,7 @@
 //  Created by Denzel Nyatsanza on 5/20/26.
 //
 
+import Foundation
 import DeviceActivity
 import ManagedSettings
 import FamilyControls
@@ -75,7 +76,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         if let unlockEndDate, unlockEndDate > Date() {
             store.clearAllSettings()
             BYSUnlockStore.saveShieldCurrentlyApplied(false)
-            debugLog("relock skipped: unlock still active")
+            debugLog("relock skipped: Focus Flame still active")
             return
         }
 

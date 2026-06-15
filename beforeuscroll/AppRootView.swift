@@ -13,11 +13,8 @@ struct AppRootView: View {
         }
         .background(BYSTheme.background.ignoresSafeArea())
         .sheet(item: $appState.activePauseTrigger) { active in
-            PauseFlowView(
-                trigger: active.trigger,
-                presetVerse: VerseLibrary.verse(for: appState.settings.selectedGoal)
-            )
-            .environmentObject(appState)
+            PauseFlowView(trigger: active.trigger)
+                .environmentObject(appState)
         }
     }
 }

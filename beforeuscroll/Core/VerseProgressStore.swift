@@ -11,7 +11,7 @@ enum VerseProgressStore {
         let candidates = VerseLibrary.verses(for: category)
 
         guard !candidates.isEmpty else {
-            return VerseLibrary.verse(for: goal)
+            return VerseLibrary.verses[0]
         }
 
         if let storedDate = state.dailyVerseDateByGoal[goalKey],
@@ -39,6 +39,10 @@ enum VerseProgressStore {
         state.lastCompletionDate = date
         state.selectedGoalRawValue = goal.rawValue
         saveState(state)
+        
+        // Advance the rotation for the category
+        let category = VerseLibrary.category(for: goal)
+        BYSVerseRotationStore.advance(for: category)
     }
 
     private static func selectDailyVerse(from candidates: [Verse], goalKey: String, today: Date, state: VerseProgressState) -> Verse {

@@ -1,11 +1,8 @@
 import SwiftUI
+import Combine
 
 #if canImport(FamilyControls)
 import FamilyControls
-#endif
-
-#if canImport(UIKit)
-import UIKit
 #endif
 
 struct HomeView: View {
@@ -16,74 +13,120 @@ struct HomeView: View {
     @State private var showSettings = false
     @State private var showPremium = false
     @State private var showVerseCheck = false
-    @State private var isRequestingAccess = false
-    @State private var setupError: String?
+    @State private var showPrayerMode = false
+    @State private var showThemePicker = false
+    @State private var statsMode: StatsMode = .allTime
     @State private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
-    private var currentVerse: Verse {
-        VerseLibrary.verse(for: appState.settings.selectedGoal)
+    private enum StatsMode: String, CaseIterable, Identifiable {
+        case today = "Today"
+        case allTime = "All Time"
+        var id: String { rawValue }
     }
 
-    private var homeMode: HomeMode {
-        if screenTimeService.isTemporarilyUnlocked {
-            return .unlocked
-        }
-
-        if !screenTimeService.isScreenTimeAuthorized || screenTimeService.currentSelectionCount == 0 {
-            return .setup
-        }
-
-        return .active
+    private var flame: BYSFocusFlameSnapshot {
+        appState.focusFlame
     }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                background
+                BYSTheme.background.ignoresSafeArea()
+                
+                // Hero Gradient
+                RadialGradient(
+                    colors: [appState.currentFlameTheme.glow.opacity(0.12), .clear],
+                    center: .center,
+                    startRadius: 20,
+                    endRadius: 400
+                )
+                .ignoresSafeArea()
 
-                Group {
-                    switch homeMode {
-                    case .setup:
-                        setupHomeView
-                    case .active:
-                        activeHomeView
-                    case .unlocked:
-                        unlockedHomeView
+                VStack(spacing: 0) {
+                    topBar
+                        .padding(.horizontal, 24)
+                        .padding(.top, 16)
+
+                    Spacer()
+
+                    // Center Hero: The Flame
+                    VStack(spacing: 24) {
+                        ZStack(alignment: .bottom) {
+                            BYSFlameView(
+                                progress: flame.fillPercentage,
+                                isBurning: flame.isFlameActive,
+                                theme: appState.currentFlameTheme,
+                                showFace: !flame.isFlameActive
+                            )
+                            .subtleGlow(radius: 40, opacity: flame.isFlameActive ? 0.3 : 0.1)
+                            
+                            timeOverlay
+                                .padding(.bottom, 20)
+                        }
+                        
+                        VStack(spacing: 8) {
+                            Text(appState.protectionStatus.title)
+                                .font(.system(size: 32, weight: .black, design: .rounded))
+                                .foregroundStyle(BYSTheme.text)
+                            
+                            Text(appState.protectionStatus.subtitle)
+                                .font(.headline)
+                                .foregroundStyle(BYSTheme.textMuted)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                                .lineSpacing(4)
+                        }
                     }
+
+                    Spacer()
+                    
+                    statsPanel
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+
+                    // Action Area
+                    VStack(spacing: 16) {
+                        primaryActionButton
+                        
+                        rechargeRow
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 32)
                 }
-                .transition(.opacity.combined(with: .scale(scale: 0.985)))
             }
-            .navigationTitle("")
-            .toolbar(.hidden, for: .navigationBar)
-            .animation(.spring(response: 0.42, dampingFraction: 0.88), value: homeMode)
             .onReceive(timer) { _ in
                 appState.refreshProtectionStatus()
             }
             .sheet(isPresented: $showVerseCheck) {
-                PauseFlowView(trigger: .voluntary, presetVerse: currentVerse)
+                PauseFlowView(trigger: .voluntary)
                     .environmentObject(appState)
             }
             .sheet(isPresented: $showSettings) {
                 SettingsSheet()
                     .environmentObject(appState)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showPremium) {
                 PaywallView()
                     .environmentObject(appState)
             }
+            .sheet(isPresented: $showThemePicker) {
+                FlameThemePicker()
+                    .environmentObject(appState)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+            }
+            .fullScreenCover(isPresented: $showPrayerMode) {
+                PrayerModeView()
+                    .environmentObject(appState)
+            }
             #if canImport(FamilyControls)
             .familyActivityPicker(isPresented: $showPicker, selection: $screenTimeService.selection)
             #endif
-            .onChange(of: showPicker) { isPresented in
-                guard !isPresented else { return }
-                Task {
-                    let previousCount = screenTimeService.currentSelectionCount
-                    await screenTimeService.handleSelectionChangedOrPickerDismissed()
-                    appState.refreshProtectionStatus()
-                    if previousCount == 0 && screenTimeService.currentSelectionCount > 0 && screenTimeService.shieldCurrentlyApplied {
-                        successHaptic()
+            .onChange(of: showPicker) { _, isPresented in
+                if !isPresented {
+                    Task {
+                        await screenTimeService.handleSelectionChangedOrPickerDismissed()
+                        appState.refreshProtectionStatus()
                     }
                 }
             }
@@ -94,599 +137,232 @@ struct HomeView: View {
         }
     }
 
-    private var background: some View {
-        ZStack {
-            BYSTheme.background.ignoresSafeArea()
-
-            LinearGradient(
-                colors: [
-                    BYSTheme.backgroundDeep,
-                    BYSTheme.background,
-                    Color(hex: "#101018")
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-
-            RadialGradient(
-                colors: [BYSTheme.gold.opacity(0.16), .clear],
-                center: .topLeading,
-                startRadius: 20,
-                endRadius: 420
-            )
-            .ignoresSafeArea()
-        }
-    }
-
-    private var setupHomeView: some View {
-        VStack(spacing: 0) {
-            compactTopBar(showStatus: false)
-                .padding(.horizontal, 20)
-                .padding(.top, 18)
-
-            Spacer(minLength: 24)
-
-            VStack(spacing: 22) {
-                ZStack {
-                    Circle()
-                        .fill(BYSTheme.warmGradient)
-                        .frame(width: 74, height: 74)
-                        .shadow(color: BYSTheme.gold.opacity(0.26), radius: 18, x: 0, y: 10)
-
-                    Image(systemName: "shield.lefthalf.filled")
-                        .font(.system(size: 30, weight: .black))
-                        .foregroundStyle(Color.black)
-                }
-                .accessibilityHidden(true)
-
-                VStack(spacing: 10) {
-                    Text("Protect your first app")
-                        .font(.system(size: 32, weight: .black, design: .rounded))
-                        .foregroundStyle(BYSTheme.text)
-                        .multilineTextAlignment(.center)
-
-                    Text("Choose one distracting app. Before opening it, you’ll pause with Scripture.")
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(BYSTheme.textMuted)
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(3)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                VStack(spacing: 10) {
-                    trustPoint("checkmark.circle.fill", "You choose the apps")
-                    trustPoint("eye.slash.fill", "BeforeUScroll cannot read your screen")
-                    trustPoint("slider.horizontal.3", "You can change this anytime")
-                }
-
-                if let setupError {
-                    Text(setupError)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(BYSTheme.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 8)
-                }
-            }
-            .padding(.horizontal, 28)
-
-            Spacer(minLength: 24)
-
-            BYSPrimaryButton(title: isRequestingAccess ? "Requesting Access..." : "Set Up Protection", systemImage: "lock.shield.fill") {
-                handleSetupProtectionTapped()
-            }
-            .disabled(isRequestingAccess)
-            .opacity(isRequestingAccess ? 0.7 : 1)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 28)
-        }
-    }
-
-    private var activeHomeView: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 14) {
-                compactTopBar(showStatus: true)
-                currentVerseCard
-                protectionCard
-                statsRow
-                recentChecks
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 30)
-        }
-    }
-
-    private var unlockedHomeView: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 18) {
-                compactTopBar(showStatus: false)
-
-                BYSGlassCard(padding: 22, cornerRadius: 24) {
-                    VStack(spacing: 18) {
-                        ZStack {
-                            Circle()
-                                .stroke(Color.white.opacity(0.10), lineWidth: 10)
-                                .frame(width: 124, height: 124)
-
-                            Circle()
-                                .trim(from: 0, to: countdownProgress)
-                                .stroke(BYSTheme.gold, style: StrokeStyle(lineWidth: 10, lineCap: .round))
-                                .frame(width: 124, height: 124)
-                                .rotationEffect(.degrees(-90))
-                                .animation(.easeInOut(duration: 0.35), value: screenTimeService.remainingUnlockSeconds)
-
-                            VStack(spacing: 2) {
-                                Text(unlockCountdownText)
-                                    .font(.system(size: 27, weight: .black, design: .rounded))
-                                    .foregroundStyle(BYSTheme.text)
-
-                                Text("left")
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(BYSTheme.textFaint)
-                            }
-                        }
-
-                        VStack(spacing: 7) {
-                            Text("Unlocked for \(unlockMinuteText)")
-                                .font(.system(size: 29, weight: .black, design: .rounded))
-                                .foregroundStyle(BYSTheme.text)
-
-                            Text("Protection returns automatically.")
-                                .font(.headline)
-                                .foregroundStyle(BYSTheme.textMuted)
-                        }
-                        .multilineTextAlignment(.center)
-
-                        BYSSecondaryButton(title: "Lock Again Now", systemImage: "lock.fill") {
-                            appState.lockAgainNow()
-                            successHaptic()
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-
-                compactVersePreview
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 30)
-        }
-    }
-
-    private func compactTopBar(showStatus: Bool) -> some View {
+    private var topBar: some View {
         HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text("BeforeUScroll")
-                    .font(.system(size: 24, weight: .black, design: .rounded))
-                    .foregroundStyle(BYSTheme.text)
+            BYSBrandMark(size: .small, showsGlow: false)
+                .cardEntrance()
 
-                if showStatus {
-                    statusPill
-                }
+            VStack(alignment: .leading, spacing: 2) {
+                Text("BeforeUScroll")
+                    .font(.system(size: 18, weight: .black, design: .rounded))
+                    .foregroundStyle(BYSTheme.text)
+                
+                protectionPill
             }
 
             Spacer()
 
-            BYSIconButton(systemImage: "crown.fill", badgeText: appState.settings.isPremium ? nil : "PRO") {
-                showPremium = true
-            }
-            .frame(width: 44, height: 44)
+            HStack(spacing: 8) {
+                BYSIconButton(systemImage: "crown.fill", badgeText: appState.settings.isPremium ? nil : "PRO") {
+                    showPremium = true
+                }
+                .scaleEffect(0.8)
 
-            BYSIconButton(systemImage: "gearshape.fill") {
-                showSettings = true
+                BYSIconButton(systemImage: "paintpalette.fill") {
+                    showThemePicker = true
+                }
+                .scaleEffect(0.8)
+
+                BYSIconButton(systemImage: "gearshape.fill") {
+                    showSettings = true
+                }
+                .scaleEffect(0.8)
             }
-            .frame(width: 44, height: 44)
         }
     }
 
-    private var statusPill: some View {
-        HStack(spacing: 6) {
+    private var protectionPill: some View {
+        HStack(spacing: 5) {
             Circle()
                 .fill(screenTimeService.isProtectionEnabled ? BYSTheme.green : BYSTheme.textFaint)
                 .frame(width: 7, height: 7)
-
-            Text(screenTimeService.isProtectionEnabled ? "Protected" : "Protection Off")
-                .font(.caption.weight(.black))
+            
+            Text(screenTimeService.isProtectionEnabled ? "Protection Active" : "Protection Off")
+                .font(.system(size: 10, weight: .black))
                 .foregroundStyle(screenTimeService.isProtectionEnabled ? BYSTheme.green : BYSTheme.textFaint)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Capsule().fill(Color.white.opacity(0.08)))
-        .accessibilityLabel(screenTimeService.isProtectionEnabled ? "Protected" : "Protection Off")
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(Capsule().fill(Color.white.opacity(0.06)))
     }
 
-    private var currentVerseCard: some View {
-        BYSCard(padding: 0, cornerRadius: 24) {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Label("Current Verse", systemImage: "book.closed.fill")
-                            .font(.caption.weight(.black))
-                            .foregroundStyle(BYSTheme.gold)
-
-                        Spacer()
-
-                        Text(currentVerse.reference)
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(BYSTheme.textMuted)
-                    }
-
-                    Text(currentVerse.text)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundStyle(BYSTheme.text)
-                        .lineSpacing(3)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(20)
-                .background(BYSTheme.heroGradient)
-
-                BYSPrimaryButton(title: "Start Verse Check", systemImage: "arrow.right.circle.fill") {
-                    showVerseCheck = true
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+    private var timeOverlay: some View {
+        VStack(spacing: 2) {
+            if flame.isFlameActive {
+                Text(formatRemainingTime(flame.flameRemainingSeconds))
+                    .font(.system(size: 20, weight: .black, design: .rounded))
+                    .monospacedDigit()
+                Text("left")
+                    .font(.system(size: 10, weight: .bold))
+                    .textCase(.uppercase)
+                    .opacity(0.6)
+            } else {
+                Text("\(flame.flameRemainingSeconds / 60) / \(flame.maxFlameSeconds / 60) min")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                Text("ready")
+                    .font(.system(size: 9, weight: .black))
+                    .textCase(.uppercase)
+                    .opacity(0.5)
             }
         }
-    }
-
-    private var protectionCard: some View {
-        BYSCard(padding: 16, cornerRadius: 22) {
-            VStack(spacing: 14) {
-                HStack(spacing: 12) {
-                    Image(systemName: screenTimeService.isProtectionEnabled ? "checkmark.shield.fill" : "shield.slash.fill")
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(screenTimeService.isProtectionEnabled ? BYSTheme.green : BYSTheme.textFaint)
-                        .frame(width: 34, height: 34)
-                        .background(Circle().fill(Color.white.opacity(0.08)))
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Protected apps")
-                            .font(.headline.bold())
-                            .foregroundStyle(BYSTheme.text)
-
-                        Text("\(screenTimeService.currentSelectionCount) selections")
-                            .font(.subheadline)
-                            .foregroundStyle(BYSTheme.textMuted)
-                    }
-
-                    Spacer()
-
-                    Toggle("Protection", isOn: Binding(
-                        get: { screenTimeService.isProtectionEnabled },
-                        set: { newValue in
-                            appState.setProtectionEnabled(newValue)
-                            if newValue {
-                                successHaptic()
-                            }
-                        }
-                    ))
-                    .labelsHidden()
-                    .tint(BYSTheme.gold)
-                }
-
-                Button {
-                    handleEditAppsTapped()
-                } label: {
-                    Label("Edit Apps", systemImage: "slider.horizontal.3")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(BYSTheme.text)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color.white.opacity(0.08))
-                        )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private var statsRow: some View {
-        HStack(spacing: 10) {
-            statTile(value: "\(appState.completedTodayCount)", label: "Checks today")
-            statTile(value: "\(appState.avoidedUnlocksToday)", label: "Stayed locked")
-            statTile(value: "\(screenTimeService.currentSelectionCount)", label: "Protected apps")
-        }
-    }
-
-    private func statTile(value: String, label: String) -> some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(.system(size: 24, weight: .black, design: .rounded))
-                .foregroundStyle(BYSTheme.text)
-
-            Text(label)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(BYSTheme.textFaint)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 78)
+        .foregroundStyle(BYSTheme.text)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.white.opacity(0.06))
-                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(BYSTheme.border, lineWidth: 1))
+            Capsule()
+                .fill(.ultraThinMaterial.opacity(0.5))
+                .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
         )
     }
 
-    private var recentChecks: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Recent checks")
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(BYSTheme.textMuted)
-
-            if appState.sessions.isEmpty {
-                Text("Completed verse checks will appear here.")
-                    .font(.footnote)
-                    .foregroundStyle(BYSTheme.textFaint)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 8)
-            } else {
-                ForEach(appState.sessions.prefix(3)) { session in
-                    HStack {
-                        Label(session.decision == .stayedLocked ? "Stayed locked" : "Unlocked", systemImage: session.decision == .stayedLocked ? "checkmark.shield.fill" : "lock.open.fill")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(BYSTheme.textMuted)
-
-                        Spacer()
-
-                        Text(session.startedAt, style: .time)
-                            .font(.caption.weight(.bold))
+    private var statsPanel: some View {
+        BYSGlassCard(padding: 12, cornerRadius: 20) {
+            VStack(spacing: 12) {
+                HStack {
+                    Text(statsMode.rawValue)
+                        .font(.caption.weight(.black))
+                        .foregroundStyle(BYSTheme.gold)
+                        .tracking(1.0)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            statsMode = (statsMode == .today) ? .allTime : .today
+                        }
+                    } label: {
+                        Image(systemName: "arrow.left.arrow.right")
+                            .font(.system(size: 10, weight: .bold))
                             .foregroundStyle(BYSTheme.textFaint)
+                            .padding(6)
+                            .background(Circle().fill(Color.white.opacity(0.05)))
                     }
-                    .padding(.vertical, 9)
-                    .padding(.horizontal, 12)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white.opacity(0.045)))
                 }
-            }
-        }
-        .padding(.top, 2)
-    }
-
-    private var compactVersePreview: some View {
-        BYSCard(padding: 16, cornerRadius: 20) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Current Verse")
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(BYSTheme.gold)
-
-                Text(currentVerse.text)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(BYSTheme.textMuted)
-                    .lineLimit(4)
-
-                Text(currentVerse.reference)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(BYSTheme.textFaint)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    private func trustPoint(_ icon: String, _ title: String) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(BYSTheme.gold)
-                .frame(width: 22)
-
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(BYSTheme.textMuted)
-
-            Spacer()
-        }
-        .frame(maxWidth: 330)
-    }
-
-    private var unlockCountdownText: String {
-        let seconds = screenTimeService.remainingUnlockSeconds
-        let minutesPart = seconds / 60
-        let secondsPart = seconds % 60
-        return String(format: "%d:%02d", minutesPart, secondsPart)
-    }
-
-    private var unlockMinuteText: String {
-        let minutes = max(1, Int(ceil(Double(screenTimeService.remainingUnlockSeconds) / 60.0)))
-        return "\(minutes) min"
-    }
-
-    private var countdownProgress: CGFloat {
-        guard let endDate = screenTimeService.unlockEndDate else { return 0 }
-        let total = max(1, endDate.timeIntervalSince(Date().addingTimeInterval(-TimeInterval(screenTimeService.remainingUnlockSeconds))))
-        return CGFloat(max(0, min(1, Double(screenTimeService.remainingUnlockSeconds) / total)))
-    }
-
-    private func handleSetupProtectionTapped() {
-        guard !isRequestingAccess else { return }
-        setupError = nil
-
-        Task {
-            if !screenTimeService.isScreenTimeAuthorized {
-                isRequestingAccess = true
-                let granted = await screenTimeService.requestAuthorization()
-                isRequestingAccess = false
-
-                guard granted else {
-                    setupError = "Screen Time access is required to protect apps."
-                    return
-                }
-            }
-
-            showPicker = true
-        }
-    }
-
-    private func handleEditAppsTapped() {
-        if screenTimeService.isScreenTimeAuthorized {
-            showPicker = true
-        } else {
-            handleSetupProtectionTapped()
-        }
-    }
-
-    private func successHaptic() {
-        #if canImport(UIKit)
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        #endif
-    }
-}
-
-private enum HomeMode: Equatable {
-    case setup
-    case active
-    case unlocked
-}
-
-private struct SettingsSheet: View {
-    @EnvironmentObject private var appState: BYSAppState
-    @State private var versionTapCount = 0
-    @State private var showDeveloperControls = false
-    @State private var isRestoring = false
-
-    var body: some View {
-        ZStack {
-            BYSTheme.background.ignoresSafeArea()
-
-            ScrollView {
-                VStack(spacing: 18) {
-                    BYSHeader(
-                        eyebrow: "Settings",
-                        title: "BeforeUScroll",
-                        subtitle: "Manage Premium, purchases, privacy, and support."
+                
+                HStack(spacing: 0) {
+                    statItem(
+                        value: "\(statsMode == .today ? appState.stats.todayScriptureCount : appState.stats.allTimeScriptureCount)",
+                        label: "Scriptures",
+                        systemImage: "book.closed.fill"
                     )
-
-                    BYSCard {
-                        VStack(spacing: 0) {
-                            Link(destination: AppLinks.privacy) {
-                                settingsRow("Privacy Policy", icon: "hand.raised.fill", trailing: "Open")
-                            }
-
-                            Divider().background(BYSTheme.border)
-
-                            Link(destination: AppLinks.terms) {
-                                settingsRow("Terms of Service", icon: "doc.text.fill", trailing: "Open")
-                            }
-
-                            Divider().background(BYSTheme.border)
-
-                            Link(destination: AppLinks.support) {
-                                settingsRow("Support", icon: "questionmark.circle.fill", trailing: "Open")
-                            }
-
-                            Divider().background(BYSTheme.border)
-
-                            Button {
-                                Task {
-                                    isRestoring = true
-                                    let restored = await appState.storeKitService.restorePurchases()
-                                    appState.settings.isPremium = restored
-                                    isRestoring = false
-                                }
-                            } label: {
-                                settingsRow(isRestoring ? "Restoring..." : "Restore Purchases", icon: "arrow.clockwise", trailing: "")
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(isRestoring)
-                        }
-                    }
-
-                    BYSCard {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(appState.settings.isPremium ? "Premium Active" : "Premium")
-                                .font(.title3.bold())
-                                .foregroundStyle(BYSTheme.text)
-
-                            Text(appState.settings.isPremium ? "Thank you for supporting the app." : "Unlock unlimited protected apps and longer unlocks.")
-                                .font(.subheadline)
-                                .foregroundStyle(BYSTheme.textMuted)
-
-                            if !appState.settings.isPremium {
-                                BYSPrimaryButton(title: "View Premium", systemImage: "crown.fill") {
-                                    appState.isPaywallPresented = true
-                                }
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-
-                    Text("Version 1.0")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(BYSTheme.textFaint)
-                        .onTapGesture {
-                            versionTapCount += 1
-                            if versionTapCount >= 7 {
-                                showDeveloperControls.toggle()
-                            }
-                        }
-
-                    if showDeveloperControls {
-                        developerControls
-                    }
-                }
-                .padding(20)
-            }
-        }
-        .sheet(isPresented: $appState.isPaywallPresented) {
-            PaywallView()
-                .environmentObject(appState)
-        }
-    }
-
-    private func settingsRow(_ title: String, icon: String, trailing: String) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .foregroundStyle(BYSTheme.gold)
-                .frame(width: 24)
-
-            Text(title)
-                .foregroundStyle(BYSTheme.text)
-
-            Spacer()
-
-            if !trailing.isEmpty {
-                Text(trailing)
-                    .font(.caption.bold())
-                    .foregroundStyle(BYSTheme.textFaint)
-            }
-        }
-        .padding(.vertical, 14)
-    }
-
-    private var developerControls: some View {
-        BYSCard {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("Developer Controls")
-                    .font(.headline.bold())
-                    .foregroundStyle(BYSTheme.red)
-
-                BYSSecondaryButton(title: "Test Verse Check", systemImage: "link") {
-                    appState.startPause(trigger: .shield)
-                }
-
-                BYSSecondaryButton(title: "Clear Shield", systemImage: "shield.slash.fill") {
-                    Task {
-                        await appState.screenTimeService.clearShield(userDisabled: true)
-                        appState.refreshProtectionStatus()
-                    }
-                }
-
-                BYSSecondaryButton(title: "Reset Onboarding", systemImage: "arrow.counterclockwise") {
-                    appState.settings.hasCompletedOnboarding = false
-                }
-
-                BYSSecondaryButton(title: "Clear Check History", systemImage: "trash") {
-                    appState.sessions.removeAll()
+                    Divider().frame(height: 20).padding(.horizontal, 8)
+                    statItem(
+                        value: "\(statsMode == .today ? appState.stats.todayScriptureSeconds / 60 : appState.stats.allTimeScriptureSeconds / 60)m",
+                        label: "In Word",
+                        systemImage: "clock.fill"
+                    )
+                    Divider().frame(height: 20).padding(.horizontal, 8)
+                    statItem(
+                        value: "\(statsMode == .today ? appState.stats.todayPrayerCount : appState.stats.allTimePrayerCount)",
+                        label: "Prayers",
+                        systemImage: "hands.sparkles.fill"
+                    )
+                    Divider().frame(height: 20).padding(.horizontal, 8)
+                    statItem(
+                        value: "\(statsMode == .today ? appState.stats.todayPrayerSeconds / 60 : appState.stats.allTimePrayerSeconds / 60)m",
+                        label: "In Prayer",
+                        systemImage: "timer"
+                    )
                 }
             }
         }
     }
-}
 
-#Preview {
-    HomeView()
-        .environmentObject(BYSAppState())
+    private func statItem(value: String, label: String, systemImage: String) -> some View {
+        VStack(spacing: 4) {
+            HStack(spacing: 3) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 9))
+                    .foregroundStyle(appState.currentFlameTheme.primary)
+                Text(value)
+                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .foregroundStyle(BYSTheme.text)
+            }
+            Text(label)
+                .font(.system(size: 9, weight: .medium))
+                .foregroundStyle(BYSTheme.textFaint)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private var primaryActionButton: some View {
+        switch appState.protectionStatus {
+        case .needsAuthorization:
+            BYSPrimaryButton(title: "Allow Access", systemImage: "lock.shield.fill") {
+                Task {
+                    _ = await screenTimeService.requestAuthorization()
+                    appState.refreshProtectionStatus()
+                }
+            }
+        case .needsSelection:
+            BYSPrimaryButton(title: "Choose Apps", systemImage: "checklist") {
+                showPicker = true
+            }
+        case .flameEmpty, .flameBurning, .flameFading, .flameFull:
+            HStack(spacing: 12) {
+                let scriptureAdd = appState.settings.isPremium ? 15 : 10
+                BYSPrimaryButton(title: "Read +\(scriptureAdd)", systemImage: "book.closed.fill") {
+                    appState.prepareForRecharge()
+                    showVerseCheck = true
+                }
+                
+                let prayerRate = appState.settings.isPremium ? 2 : 1
+                BYSPrimaryButton(title: "Pray +\(prayerRate)/min", systemImage: "hands.sparkles.fill") {
+                    appState.prepareForRecharge()
+                    showPrayerMode = true
+                }
+            }
+        case .notProtected:
+            BYSPrimaryButton(title: "Turn Protection On", systemImage: "shield.fill") {
+                appState.setProtectionEnabled(true)
+            }
+        }
+    }
+
+    private var rechargeRow: some View {
+        HStack(spacing: 12) {
+            if appState.protectionStatus != .needsAuthorization && appState.protectionStatus != .needsSelection {
+                secondaryAction(title: "Edit Apps", systemImage: "slider.horizontal.3") {
+                    showPicker = true
+                }
+                
+                if flame.isFlameActive {
+                    secondaryAction(title: "Extinguish", systemImage: "flame.slash.fill") {
+                        appState.extinguishFlame()
+                    }
+                }
+            } else {
+                secondaryAction(title: "Settings", systemImage: "gearshape.fill") {
+                    showSettings = true
+                }
+            }
+        }
+    }
+
+    private func secondaryAction(title: String, systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 12, weight: .bold))
+                Text(title)
+                    .font(.system(size: 14, weight: .bold))
+            }
+            .foregroundStyle(BYSTheme.text)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.white.opacity(0.06))
+                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(BYSTheme.border, lineWidth: 1))
+            )
+        }
+        .buttonStyle(PressableScaleButtonStyle())
+    }
+
+    private func formatRemainingTime(_ seconds: Int) -> String {
+        let mins = seconds / 60
+        let secs = seconds % 60
+        return String(format: "%d:%02d", mins, secs)
+    }
 }

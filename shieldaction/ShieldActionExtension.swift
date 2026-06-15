@@ -69,7 +69,7 @@ class ShieldActionExtension: ShieldActionDelegate {
 
             let content = UNMutableNotificationContent()
             content.title = "Your pause is ready"
-            content.body = "Open BeforeUScroll to complete your Scripture pause."
+            content.body = "Open BeforeUScroll to complete it."
             content.sound = .default
             content.userInfo = ["url": "beforeuscroll://pause"]
 

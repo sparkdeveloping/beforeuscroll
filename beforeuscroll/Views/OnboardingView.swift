@@ -2,26 +2,36 @@ import SwiftUI
 
 struct OnboardingView: View {
     @EnvironmentObject private var appState: BYSAppState
-
+    
     @State private var page = 0
-    @State private var selectedGoal: ScrollGoal = .doomscrolling
+    @State private var selectedGoal: ScrollGoal?
     @State private var animateGlow = false
-
-    private let pagesCount = 3
+    
+    private let pagesCount = 5 // Welcome, HowItWorks, Focus, Notifications, Ready
 
     var body: some View {
         ZStack {
-            background
-
+            BYSTheme.background.ignoresSafeArea()
+            ParallaxEmberBackground()
+            
             VStack(spacing: 0) {
                 topProgress
-
-                TabView(selection: $page) {
-                    welcomePage.tag(0)
-                    howItWorksPage.tag(1)
-                    goalPickerPage.tag(2)
+                    .padding(.top, 18)
+                
+                BYSParallaxPager(step: page) { selectedPage in
+                    switch selectedPage {
+                    case 0:
+                        welcomePage
+                    case 1:
+                        howItWorksPage
+                    case 2:
+                        goalPickerPage
+                    case 3:
+                        notificationPermissionPage
+                    default:
+                        readyPage
+                    }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
             }
         }
         .onAppear {
@@ -30,208 +40,257 @@ struct OnboardingView: View {
             }
         }
     }
-
-    private var background: some View {
-        ZStack {
-            BYSTheme.background.ignoresSafeArea()
-
-            RadialGradient(
-                colors: [BYSTheme.gold.opacity(animateGlow ? 0.24 : 0.14), .clear],
-                center: .topTrailing,
-                startRadius: 30,
-                endRadius: 430
-            )
-            .ignoresSafeArea()
-
-            RadialGradient(
-                colors: [BYSTheme.purple.opacity(0.12), .clear],
-                center: .bottomLeading,
-                startRadius: 80,
-                endRadius: 460
-            )
-            .ignoresSafeArea()
-        }
-    }
-
+    
     private var topProgress: some View {
         HStack(spacing: 8) {
             ForEach(0..<pagesCount, id: \.self) { index in
                 Capsule()
                     .fill(index <= page ? BYSTheme.gold : Color.white.opacity(0.12))
                     .frame(height: 6)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: page)
             }
         }
         .padding(.horizontal, 22)
-        .padding(.top, 18)
-        .animation(.spring(response: 0.4, dampingFraction: 0.82), value: page)
     }
-
+    
     private var welcomePage: some View {
-        VStack(spacing: 26) {
-            Spacer(minLength: 28)
-
-            ZStack {
-                Circle()
-                    .fill(BYSTheme.warmGradient)
-                    .frame(width: animateGlow ? 94 : 88, height: animateGlow ? 94 : 88)
-                    .shadow(color: BYSTheme.gold.opacity(0.30), radius: 22, x: 0, y: 14)
-
-                Image(systemName: "book.closed.fill")
-                    .font(.system(size: 40, weight: .black))
-                    .foregroundStyle(Color.black)
-            }
-            .accessibilityHidden(true)
-
+        VStack(spacing: 30) {
+            Spacer()
+            
+            BYSBrandMark(size: .hero, showsGlow: true)
+                .cardEntrance()
+            
             VStack(spacing: 12) {
-                Text("Welcome to BeforeUScroll")
-                    .font(.system(size: 38, weight: .black, design: .rounded))
+                Text("Scripture before the scroll.")
+                    .font(.system(size: 32, weight: .black, design: .rounded))
                     .foregroundStyle(BYSTheme.text)
                     .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.78)
-
-                Text("Protect distracting apps with a Scripture pause.")
+                
+                Text("A new way to guard your attention.")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(BYSTheme.textMuted)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(3)
             }
-
+            .cardEntrance(delay: 0.2)
+            
             Spacer()
-
-            BYSPrimaryButton(title: "Continue", systemImage: "arrow.right.circle.fill") {
+            
+            BYSPrimaryButton(title: "Get Started", systemImage: "arrow.right") {
                 goToNextPage()
             }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
+            .cardEntrance(delay: 0.4)
         }
-        .padding(24)
     }
-
+    
     private var howItWorksPage: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 32) {
             BYSHeader(
                 eyebrow: "How it works",
-                title: "Scripture before scrolling.",
-                subtitle: "Choose apps. Read one verse. Answer three questions. Then choose intentionally."
+                title: "Recharge your Flame",
+                subtitle: "Your Flame keeps protected apps open. When it burns out, they lock again."
             )
-
-            Spacer()
-
-            VStack(spacing: 14) {
-                flowCard(number: "1", title: "Choose apps", subtitle: "Pick the apps that pull you into scrolling.")
-                flowCard(number: "2", title: "Read one verse", subtitle: "Pause with the current verse before opening them.")
-                flowCard(number: "3", title: "Answer three questions", subtitle: "A quick check helps break autopilot.")
-                flowCard(number: "4", title: "Choose intentionally", subtitle: "Unlock briefly or stay locked.")
+            .padding(.horizontal, 24)
+            .padding(.top, 20)
+            
+            VStack(spacing: 16) {
+                onboardingStep(number: "1", title: "Refill with Scripture", subtitle: "Answer questions to add intentional time.", delay: 0.1)
+                onboardingStep(number: "2", title: "Keep it burning", subtitle: "Open your protected apps while the flame lasts.", delay: 0.2)
+                onboardingStep(number: "3", title: "Protection Returns", subtitle: "Apps lock automatically when the flame is out.", delay: 0.3)
             }
-
+            .padding(.horizontal, 24)
+            
             Spacer()
-
+            
             BYSPrimaryButton(title: "Continue", systemImage: "arrow.right") {
                 goToNextPage()
             }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
         }
-        .padding(24)
     }
-
+    
     private var goalPickerPage: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             BYSHeader(
                 eyebrow: "Your focus",
-                title: "What do you want help with?",
-                subtitle: "This chooses the kind of verses you’ll study first."
+                title: "Choose your focus",
+                subtitle: "This determines which Scriptures will refill your Flame first."
             )
-
+            .padding(.horizontal, 24)
+            .padding(.top, 20)
+            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 12) {
-                    ForEach(ScrollGoal.allCases) { goal in
+                    ForEach(Array(ScrollGoal.allCases.enumerated()), id: \.element.id) { index, goal in
                         goalButton(goal)
+                            .cardEntrance(delay: Double(index) * 0.05)
                     }
                 }
-                .padding(.vertical, 6)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 20)
             }
-
-            BYSPrimaryButton(title: "Enter BeforeUScroll", systemImage: "arrow.right.circle.fill") {
-                appState.completeOnboarding(goal: selectedGoal)
+            
+            if let selectedGoal {
+                BYSPrimaryButton(title: "Continue", systemImage: "arrow.right") {
+                    goToNextPage()
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 32)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            } else {
+                Text("Select an option to continue")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(BYSTheme.textFaint)
+                    .padding(.bottom, 50)
             }
         }
-        .padding(24)
     }
-
-    private func flowCard(number: String, title: String, subtitle: String) -> some View {
-        HStack(spacing: 14) {
+    
+    private var notificationPermissionPage: some View {
+        VStack(spacing: 32) {
+            Spacer()
+            
+            BYSBrandMark(size: .large, showsGlow: true)
+                .cardEntrance()
+            
+            VStack(spacing: 16) {
+                Text("Know when your Flame is low.")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .foregroundStyle(BYSTheme.text)
+                    .multilineTextAlignment(.center)
+                
+                Text("BeforeUScroll can remind you when intentional time is almost gone and when protection returns.")
+                    .font(.headline)
+                    .foregroundStyle(BYSTheme.textMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .lineSpacing(4)
+            }
+            .cardEntrance(delay: 0.2)
+            
+            Spacer()
+            
+            VStack(spacing: 16) {
+                BYSPrimaryButton(title: "Allow Notifications", systemImage: "bell.fill") {
+                    requestNotifications()
+                }
+                
+                Button("Not Now") {
+                    goToNextPage()
+                }
+                .font(.headline.weight(.bold))
+                .foregroundStyle(BYSTheme.textMuted)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
+            .cardEntrance(delay: 0.4)
+        }
+    }
+    
+    private var readyPage: some View {
+        VStack(spacing: 32) {
+            Spacer()
+            
+            BYSBrandMark(size: .large, showsGlow: true)
+                .cardEntrance()
+            
+            VStack(spacing: 12) {
+                Text("You're ready.")
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                    .foregroundStyle(BYSTheme.text)
+                
+                Text("Protection is active. Recharge your Flame whenever you need intentional time.")
+                    .font(.headline)
+                    .foregroundStyle(BYSTheme.textMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+            .cardEntrance(delay: 0.2)
+            
+            Spacer()
+            
+            BYSPrimaryButton(title: "Enter App", systemImage: "checkmark.circle.fill") {
+                if let goal = selectedGoal {
+                    appState.completeOnboarding(goal: goal)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
+            .cardEntrance(delay: 0.4)
+        }
+    }
+    
+    private func onboardingStep(number: String, title: String, subtitle: String, delay: Double) -> some View {
+        HStack(spacing: 16) {
             Text(number)
                 .font(.headline.weight(.black))
                 .foregroundStyle(Color.black)
-                .frame(width: 42, height: 42)
+                .frame(width: 36, height: 36)
                 .background(Circle().fill(BYSTheme.gold))
-
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline.bold())
                     .foregroundStyle(BYSTheme.text)
-
+                
                 Text(subtitle)
                     .font(.subheadline)
                     .foregroundStyle(BYSTheme.textMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }
-
             Spacer()
         }
         .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.white.opacity(0.075))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .stroke(BYSTheme.border, lineWidth: 1)
-                )
-        )
+        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color.white.opacity(0.06)))
+        .cardEntrance(delay: delay)
     }
-
+    
     private func goalButton(_ goal: ScrollGoal) -> some View {
         Button {
+            BYSHaptics.lightTap()
             withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
                 selectedGoal = goal
             }
         } label: {
-            HStack(alignment: .top, spacing: 14) {
+            HStack(spacing: 16) {
                 Image(systemName: selectedGoal == goal ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
                     .foregroundStyle(selectedGoal == goal ? BYSTheme.gold : BYSTheme.textFaint)
-
-                VStack(alignment: .leading, spacing: 5) {
+                
+                VStack(alignment: .leading, spacing: 4) {
                     Text(goal.title)
                         .font(.headline.bold())
                         .foregroundStyle(BYSTheme.text)
-
+                    
                     Text(goal.subtitle)
                         .font(.subheadline)
                         .foregroundStyle(BYSTheme.textMuted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-
                 Spacer()
             }
             .padding(16)
             .background(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(selectedGoal == goal ? BYSTheme.gold.opacity(0.14) : Color.white.opacity(0.055))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .stroke(selectedGoal == goal ? BYSTheme.gold.opacity(0.55) : BYSTheme.border, lineWidth: 1)
-                    )
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(selectedGoal == goal ? BYSTheme.gold.opacity(0.12) : Color.white.opacity(0.05))
+                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(selectedGoal == goal ? BYSTheme.gold.opacity(0.5) : BYSTheme.border, lineWidth: 1))
             )
+            .scaleEffect(selectedGoal == goal ? 1.02 : 1.0)
         }
         .buttonStyle(.plain)
     }
-
+    
     private func goToNextPage() {
-        withAnimation(.spring(response: 0.46, dampingFraction: 0.84)) {
-            page = min(page + 1, pagesCount - 1)
+        BYSHaptics.lightTap()
+        page += 1
+    }
+    
+    private func requestNotifications() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
+            DispatchQueue.main.async {
+                goToNextPage()
+            }
         }
     }
-}
-
-#Preview {
-    OnboardingView()
-        .environmentObject(BYSAppState())
 }

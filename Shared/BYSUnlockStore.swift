@@ -7,8 +7,12 @@ enum BYSUnlockStore {
     private static let shieldCurrentlyAppliedKey = "bys.shieldCurrentlyApplied"
     private static let legacyShieldAppliedKey = "bys.isShieldApplied"
 
-    static func saveUnlockEndDate(_ date: Date) {
-        BYSAppGroup.defaults.set(date, forKey: unlockEndDateKey)
+    static func saveUnlockEndDate(_ date: Date?) {
+        if let date {
+            BYSAppGroup.defaults.set(date, forKey: unlockEndDateKey)
+        } else {
+            BYSAppGroup.defaults.removeObject(forKey: unlockEndDateKey)
+        }
     }
 
     static func loadUnlockEndDate() -> Date? {
