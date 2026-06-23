@@ -24,3 +24,7 @@ web/dist/
 web/.vercel/
 web/.env.local
 web/.env*.local
+build/
+*.xcarchive
+*.ipa
+DerivedData/
