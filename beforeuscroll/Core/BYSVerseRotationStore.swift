@@ -3,6 +3,7 @@ import Foundation
 struct BYSVerseRotationState: Codable, Equatable {
     var queuesByCategory: [String: [String]] = [:] // VerseCategory.rawValue: [VerseID]
     var indicesByCategory: [String: Int] = [:] // VerseCategory.rawValue: CurrentIndex
+    var lastFirstQuestionIDByVerse: [String: String] = [:] // VerseID: QuestionID
 }
 
 enum BYSVerseRotationStore {
@@ -13,17 +14,32 @@ enum BYSVerseRotationStore {
         let categoryKey = category.rawValue
         
         let queue = getOrInitializeQueue(for: category, in: &state)
-        let index = state.indicesByCategory[categoryKey] ?? 0
+        var index = state.indicesByCategory[categoryKey] ?? 0
         
-        // Ensure index is valid
         if index >= queue.count {
             state.indicesByCategory[categoryKey] = 0
             saveState(state)
-            return currentVerse(for: category)
+            index = 0
         }
         
         let verseID = queue[index]
         return VerseLibrary.verses.first(where: { $0.id == verseID }) ?? VerseLibrary.verses[0]
+    }
+
+    static func ensureQueueExists(for goal: ScrollGoal) {
+        var state = loadState()
+        _ = getOrInitializeQueue(for: VerseLibrary.category(for: goal), in: &state)
+    }
+    
+    static func lastFirstQuestionID(for verseID: String) -> String? {
+        let state = loadState()
+        return state.lastFirstQuestionIDByVerse[verseID]
+    }
+    
+    static func setLastFirstQuestionID(_ questionID: String, for verseID: String) {
+        var state = loadState()
+        state.lastFirstQuestionIDByVerse[verseID] = questionID
+        saveState(state)
     }
     
     static func advance(for category: VerseCategory) {

@@ -2,10 +2,18 @@ import Foundation
 import StoreKit
 import Combine
 
+enum BYSPremiumProductState: Equatable {
+    case idle
+    case loading
+    case loaded
+    case unavailable(String)
+}
+
 @MainActor
 final class StoreKitService: ObservableObject {
     static let shared = StoreKitService()
 
+    @Published private(set) var productState: BYSPremiumProductState = .idle
     @Published private(set) var products: [Product] = []
     @Published private(set) var purchasedProductIDs: Set<String> = []
     @Published private(set) var isLoading = false
@@ -26,24 +34,50 @@ final class StoreKitService: ObservableObject {
     }
 
     func configure() async {
-        await loadProducts()
+        await loadProducts(force: false)
         await updatePurchasedProducts()
     }
 
-    func loadProducts() async {
+    func loadProducts(force: Bool = false) async {
+        if isLoading { return }
+        if !force, !products.isEmpty { return }
+
         isLoading = true
-        defer { isLoading = false }
+        productState = .loading
+        purchaseErrorMessage = nil
 
-        do {
-            let loadedProducts = try await Product.products(for: BYSProductIDs.all)
+        let requested = BYSProductIDs.all
+        print("BYS products requested:", BYSProductIDs.ordered)
 
-            products = loadedProducts.sorted { lhs, rhs in
-                sortIndex(for: lhs.id) < sortIndex(for: rhs.id)
+        for attempt in 1...3 {
+            do {
+                let loadedProducts = try await Product.products(for: requested)
+                let returned = Set(loadedProducts.map(\.id))
+                let missing = requested.subtracting(returned)
+
+                print("BYS StoreKit attempt:", attempt)
+                print("BYS StoreKit returned IDs:", returned)
+                print("BYS StoreKit missing IDs:", missing)
+
+                if !loadedProducts.isEmpty {
+                    products = loadedProducts.sorted { lhs, rhs in
+                        sortIndex(for: lhs.id) < sortIndex(for: rhs.id)
+                    }
+                    productState = .loaded
+                    isLoading = false
+                    return
+                }
+            } catch {
+                print("BYS StoreKit load failed attempt \(attempt):", error)
+                purchaseErrorMessage = error.localizedDescription
             }
-        } catch {
-            purchaseErrorMessage = "Could not load Premium options. Please try again."
-            print("Failed loading StoreKit products: \(error)")
+
+            try? await Task.sleep(nanoseconds: UInt64(attempt) * 700_000_000)
         }
+
+        products = []
+        productState = .unavailable("Premium is temporarily unavailable. Please try again shortly.")
+        isLoading = false
     }
 
     func purchase(_ product: Product) async -> Bool {
@@ -109,6 +143,8 @@ final class StoreKitService: ObservableObject {
         }
 
         purchasedProductIDs = purchased
+        print("BYS StoreKit purchased IDs:", purchasedProductIDs)
+        print("BYS StoreKit premium active:", isPremium)
     }
 
     private func listenForTransactions() -> Task<Void, Never> {

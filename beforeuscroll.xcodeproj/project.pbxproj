@@ -633,8 +633,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = beforeuscroll/beforeuscroll.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K48G99PWNM;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = beforeuscroll/Info.plist;
@@ -651,9 +651,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll;
+				PRODUCT_BUNDLE_IDENTIFIER = com.denzeltinashe.beforeuscroll;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -670,8 +672,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = beforeuscroll/beforeuscroll.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K48G99PWNM;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = beforeuscroll/Info.plist;
@@ -688,9 +690,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll;
+				PRODUCT_BUNDLE_IDENTIFIER = com.denzeltinashe.beforeuscroll;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -705,8 +709,8 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shieldconfiguration/shieldconfiguration.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K48G99PWNM;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = shieldconfiguration/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = shieldconfiguration;
@@ -718,7 +722,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.shieldconfiguration;
+				PRODUCT_BUNDLE_IDENTIFIER = com.denzeltinashe.beforeuscroll.shieldconfiguration;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -735,8 +739,8 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shieldconfiguration/shieldconfiguration.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K48G99PWNM;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = shieldconfiguration/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = shieldconfiguration;
@@ -748,7 +752,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.shieldconfiguration;
+				PRODUCT_BUNDLE_IDENTIFIER = com.denzeltinashe.beforeuscroll.shieldconfiguration;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -765,8 +769,8 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shieldaction/shieldaction.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K48G99PWNM;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = shieldaction/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = shieldaction;
@@ -778,7 +782,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.shieldaction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.denzeltinashe.beforeuscroll.shieldaction;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -795,8 +799,8 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shieldaction/shieldaction.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K48G99PWNM;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = shieldaction/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = shieldaction;
@@ -808,7 +812,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.shieldaction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.denzeltinashe.beforeuscroll.shieldaction;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -825,8 +829,8 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = deviceactivitymonitor/deviceactivitymonitor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K48G99PWNM;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = deviceactivitymonitor/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = deviceactivitymonitor;
@@ -838,7 +842,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.deviceactivitymonitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.denzeltinashe.beforeuscroll.deviceactivitymonitor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -855,8 +859,8 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = deviceactivitymonitor/deviceactivitymonitor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K48G99PWNM;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = deviceactivitymonitor/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = deviceactivitymonitor;
@@ -868,7 +872,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sbj.beforeuscroll.deviceactivitymonitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.denzeltinashe.beforeuscroll.deviceactivitymonitor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

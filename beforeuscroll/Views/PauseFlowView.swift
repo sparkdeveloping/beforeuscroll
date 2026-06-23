@@ -22,14 +22,13 @@ struct PauseFlowView: View {
     private let verse: Verse
     private let totalRequired = 5
 
-    init(trigger: PauseTrigger) {
+    init(trigger: PauseTrigger, goal: ScrollGoal) {
         self.trigger = trigger
-        // In a real app we'd resolve goal from settings, for now assume doomscrolling/discipline
-        let selectedVerse = VerseLibrary.verses[0] // Assume first for demo
+        let selectedVerse = VerseLibrary.currentVerseOfStudy(for: goal)
         self.verse = selectedVerse
         
-        let shuffled = selectedVerse.quiz.map { $0.shuffledForSession() }
-        _questionQueue = State(initialValue: shuffled)
+        let sessionQuestions = BYSScriptureQuestionSession.build(for: selectedVerse)
+        _questionQueue = State(initialValue: sessionQuestions)
     }
 
     var body: some View {
@@ -368,6 +367,10 @@ struct PauseFlowView: View {
         if !hasAppliedRecharge {
             let duration = Int(Date().timeIntervalSince(startTime))
             rechargeResult = appState.rechargeFocusFlameFromScripture(durationSeconds: duration)
+            
+            // Advance verse rotation
+            VerseProgressStore.markCompleted(verseID: verse.id, for: appState.settings.selectedGoal)
+            
             hasAppliedRecharge = true
         }
         withAnimation(BYSMotion.successSpring) {

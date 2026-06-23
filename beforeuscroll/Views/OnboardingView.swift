@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct OnboardingView: View {
     @EnvironmentObject private var appState: BYSAppState
@@ -286,11 +287,17 @@ struct OnboardingView: View {
         page += 1
     }
     
+    // Uses the async requestAuthorization API with @MainActor to avoid concurrency
+    // violations when calling @MainActor-isolated appState methods from a background callback.
     private func requestNotifications() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
-            DispatchQueue.main.async {
-                goToNextPage()
+        Task { @MainActor in
+            do {
+                _ = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound])
+            } catch {
+                // Authorization request failed — continue gracefully; user can enable later in Settings
             }
+            appState.markNotificationPermissionAsked()
+            goToNextPage()
         }
     }
 }

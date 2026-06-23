@@ -107,6 +107,7 @@ final class ScreenTimeService: ObservableObject {
         }
 
         guard currentSelectionCount > 0 else {
+            BYSUnlockStore.saveDesiredProtectionEnabled(false)
             BYSUnlockStore.saveShieldCurrentlyApplied(false)
             refreshPublishedProtectionState()
             debugLog("applyShield skipped: no apps selected")
@@ -196,6 +197,7 @@ final class ScreenTimeService: ObservableObject {
 
         guard currentSelectionCount > 0 else {
             debugLog("picker dismissed: no selection, clearing shields")
+            BYSUnlockStore.saveDesiredProtectionEnabled(false)
             await clearShield(userDisabled: false)
             await reconcileShieldState()
             return
@@ -251,6 +253,7 @@ final class ScreenTimeService: ObservableObject {
 
         guard currentSelectionCount > 0 else {
             debugLog("reconcile skipped: no apps selected")
+            BYSUnlockStore.saveDesiredProtectionEnabled(false)
             await clearShield(userDisabled: false)
             return
         }

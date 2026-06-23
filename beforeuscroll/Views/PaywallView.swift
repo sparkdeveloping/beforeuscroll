@@ -12,6 +12,7 @@ struct PaywallView: View {
     @State private var isPurchasing = false
     @State private var isRestoring = false
     @State private var pulse = false
+    @State private var presentedURL: BYSLinkSheetURL?
 
     init(onComplete: (() -> Void)? = nil) {
         self.onComplete = onComplete
@@ -31,45 +32,27 @@ struct PaywallView: View {
                         errorMessage(message)
                     }
 
-                    if appState.settings.isPremium {
-                        BYSPrimaryButton(title: "Done", systemImage: "checkmark") {
-                            onComplete?()
-                            dismiss()
-                        }
-                    } else {
-                        BYSPrimaryButton(title: purchaseButtonTitle, systemImage: "crown.fill") {
-                            Task {
-                                await purchaseSelectedProduct()
-                            }
-                        }
-                        .disabled(selectedProduct == nil || isPurchasing)
-
-                        BYSSecondaryButton(title: isRestoring ? "Restoring..." : "Restore Purchases", systemImage: "arrow.clockwise") {
-                            Task { await restore() }
-                        }
-                        .disabled(isRestoring)
-
-                        Button("Continue Free") {
-                            dismiss()
-                        }
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(BYSTheme.textMuted)
-                        .padding(.top, 2)
-                    }
-
+                    ctaArea
+                    requiredDisclosure
                     legalFooter
                 }
                 .padding(22)
             }
         }
         .task {
-            await storeKitService.configure()
-            selectedProduct = selectedProduct ?? preferredProduct
+            await storeKitService.loadProducts(force: true)
+            selectPreferredProductIfNeeded()
+        }
+        .onChange(of: storeKitService.products.map(\.id)) { _, _ in
+            selectPreferredProductIfNeeded()
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) {
                 pulse = true
             }
+        }
+        .sheet(item: $presentedURL) { item in
+            SafariWebSheet(url: item.url)
         }
     }
 
@@ -167,36 +150,23 @@ struct PaywallView: View {
         VStack(spacing: 12) {
             if appState.settings.isPremium {
                 EmptyView()
-            } else if storeKitService.isLoading && storeKitService.products.isEmpty {
+            } else if storeKitService.productState == .idle || storeKitService.productState == .loading {
                 BYSCard(padding: 16) {
                     HStack {
                         ProgressView()
-                        Text("Loading Premium options...")
+                        Text("Loading Premium…")
                             .foregroundStyle(BYSTheme.textMuted)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-            } else if storeKitService.products.isEmpty {
+            } else if case .unavailable = storeKitService.productState {
                 BYSCard(padding: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Premium options unavailable")
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Premium is temporarily unavailable.")
                             .font(.headline)
                             .foregroundStyle(BYSTheme.text)
 
-                        Text("Premium is not available right now. Please try again later.")
-                            .font(.subheadline)
-                            .foregroundStyle(BYSTheme.textMuted)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            } else if visibleProducts.isEmpty {
-                BYSCard(padding: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Premium options unavailable")
-                            .font(.headline)
-                            .foregroundStyle(BYSTheme.text)
-
-                        Text("Monthly and yearly Premium options are not available right now.")
+                        Text("Please check your connection or try again shortly.")
                             .font(.subheadline)
                             .foregroundStyle(BYSTheme.textMuted)
                     }
@@ -212,11 +182,7 @@ struct PaywallView: View {
     }
 
     private var visibleProducts: [Product] {
-        let preferredOrder = [BYSProductIDs.monthly, BYSProductIDs.yearly]
-        let visible = preferredOrder.compactMap { id in
-            storeKitService.products.first(where: { $0.id == id })
-        }
-        return visible.isEmpty ? storeKitService.products.filter { $0.id != BYSProductIDs.weekly } : visible
+        storeKitService.products
     }
 
     private func productRow(_ product: Product) -> some View {
@@ -230,7 +196,7 @@ struct PaywallView: View {
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 8) {
-                        Text(displayName(for: product))
+                        Text(product.displayName)
                             .font(.headline.bold())
                             .foregroundStyle(BYSTheme.text)
 
@@ -244,7 +210,7 @@ struct PaywallView: View {
                         }
                     }
 
-                    Text(description(for: product))
+                    Text(billingPeriodLabel(for: product))
                         .font(.subheadline)
                         .foregroundStyle(BYSTheme.textMuted)
                 }
@@ -255,6 +221,12 @@ struct PaywallView: View {
                     Text(product.displayPrice)
                         .font(.headline.weight(.black))
                         .foregroundStyle(BYSTheme.gold)
+
+                    if let perMonth = monthlyEquivalent(for: product) {
+                        Text(perMonth)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(BYSTheme.textFaint)
+                    }
 
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .foregroundStyle(isSelected ? BYSTheme.gold : BYSTheme.textFaint)
@@ -278,16 +250,112 @@ struct PaywallView: View {
         visibleProducts.first(where: { $0.id == BYSProductIDs.yearly }) ?? visibleProducts.first
     }
 
+    private var ctaArea: some View {
+        Group {
+            if appState.settings.isPremium {
+                BYSPrimaryButton(title: "Done", systemImage: "checkmark") {
+                    onComplete?()
+                    dismiss()
+                }
+            } else if storeKitService.productState == .idle || storeKitService.productState == .loading {
+                BYSPrimaryButton(title: "Loading Premium…", systemImage: "crown.fill") { }
+                    .disabled(true)
+            } else if case .unavailable = storeKitService.productState {
+                VStack(spacing: 12) {
+                    BYSPrimaryButton(title: "Try Again", systemImage: "arrow.clockwise") {
+                        Task {
+                            await retryLoadingProducts()
+                        }
+                    }
+                    BYSSecondaryButton(title: "Continue Free", systemImage: "xmark") {
+                        dismiss()
+                    }
+                }
+            } else {
+                VStack(spacing: 12) {
+                    BYSPrimaryButton(title: purchaseButtonTitle, systemImage: "crown.fill") {
+                        Task {
+                            await purchaseSelectedProduct()
+                        }
+                    }
+                    .disabled(selectedProduct == nil || isPurchasing || visibleProducts.isEmpty)
+
+                    BYSSecondaryButton(title: isRestoring ? "Restoring…" : "Restore Purchases", systemImage: "arrow.clockwise") {
+                        Task { await restore() }
+                    }
+                    .disabled(isRestoring)
+
+                    Button("Continue Free") {
+                        dismiss()
+                    }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(BYSTheme.textMuted)
+                    .padding(.top, 2)
+                }
+            }
+        }
+    }
+
+    private var requiredDisclosure: some View {
+        Group {
+            if !appState.settings.isPremium,
+               storeKitService.productState != .idle,
+               storeKitService.productState != .loading,
+               !visibleProducts.isEmpty {
+                if case .unavailable = storeKitService.productState {
+                    EmptyView()
+                } else {
+                    Text("Payment will be charged to your Apple Account at purchase confirmation. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period.")
+                        .font(.caption2)
+                        .foregroundStyle(BYSTheme.textFaint)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                }
+            }
+        }
+    }
+
+    private var legalFooter: some View {
+        VStack(spacing: 10) {
+            Text("Manage or cancel your subscription in your Apple Account settings after purchase.")
+                .font(.caption2)
+                .foregroundStyle(BYSTheme.textFaint)
+                .multilineTextAlignment(.center)
+
+            HStack(spacing: 18) {
+                Button("Privacy Policy") {
+                    presentedURL = BYSLinkSheetURL(url: AppLinks.privacy)
+                }
+                Button("Terms of Use") {
+                    presentedURL = BYSLinkSheetURL(url: AppLinks.terms)
+                }
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(BYSTheme.gold)
+        }
+        .padding(.top, 4)
+    }
+
     private var purchaseButtonTitle: String {
-        guard let selectedProduct else {
-            return "Choose an Option"
+        isPurchasing ? "Purchasing…" : "Start Premium"
+    }
+
+    private func selectPreferredProductIfNeeded() {
+        guard !visibleProducts.isEmpty else {
+            selectedProduct = nil
+            return
         }
 
-        if isPurchasing {
-            return "Purchasing..."
+        if let selectedProduct, visibleProducts.contains(where: { $0.id == selectedProduct.id }) {
+            return
         }
 
-        return "Choose \(displayName(for: selectedProduct))"
+        selectedProduct = preferredProduct
+    }
+
+    private func retryLoadingProducts() async {
+        await storeKitService.loadProducts(force: true)
+        selectPreferredProductIfNeeded()
     }
 
     private func purchaseSelectedProduct() async {
@@ -307,7 +375,7 @@ struct PaywallView: View {
     private func restore() async {
         isRestoring = true
         let restored = await storeKitService.restorePurchases()
-        appState.settings.isPremium = restored
+        appState.applyRestoredPremiumStatus(restored)
         isRestoring = false
 
         if restored {
@@ -328,48 +396,43 @@ struct PaywallView: View {
             )
     }
 
-    private func displayName(for product: Product) -> String {
-        switch product.id {
-        case BYSProductIDs.weekly:
-            return "Weekly"
-        case BYSProductIDs.monthly:
-            return "Monthly"
-        case BYSProductIDs.yearly:
-            return "Yearly"
-        default:
-            return product.displayName
-        }
-    }
-
-    private func description(for product: Product) -> String {
-        switch product.id {
-        case BYSProductIDs.weekly:
-            return "Try Premium with the shortest commitment."
-        case BYSProductIDs.monthly:
-            return "Flexible support month to month."
-        case BYSProductIDs.yearly:
-            return "Best value for a larger daily flame cap."
-        default:
-            return product.description.isEmpty ? "Upgrade to Premium." : product.description
-        }
-    }
-
-    private var legalFooter: some View {
-        VStack(spacing: 8) {
-            Text("Purchases are handled through your Apple ID. Subscriptions renew automatically unless canceled at least 24 hours before renewal.")
-                .font(.caption)
-                .foregroundStyle(BYSTheme.textFaint)
-                .multilineTextAlignment(.center)
-
-            HStack(spacing: 14) {
-                Link("Privacy", destination: AppLinks.privacy)
-                Link("Terms", destination: AppLinks.terms)
-                Link("Support", destination: AppLinks.support)
+    private func billingPeriodLabel(for product: Product) -> String {
+        if let period = product.subscription?.subscriptionPeriod {
+            switch period.unit {
+            case .week:
+                return period.value == 1 ? "Billed weekly" : "Billed every \(period.value) weeks"
+            case .month:
+                return period.value == 1 ? "Billed monthly" : "Billed every \(period.value) months"
+            case .year:
+                return period.value == 1 ? "Billed annually" : "Billed every \(period.value) years"
+            case .day:
+                return period.value == 1 ? "Billed daily" : "Billed every \(period.value) days"
+            @unknown default:
+                return "Subscription"
             }
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(BYSTheme.gold)
         }
-        .padding(.top, 4)
+        switch product.id {
+        case BYSProductIDs.weekly: return "Billed weekly"
+        case BYSProductIDs.monthly: return "Billed monthly"
+        case BYSProductIDs.yearly: return "Billed annually"
+        default: return "Subscription"
+        }
+    }
+
+    private func monthlyEquivalent(for product: Product) -> String? {
+        guard product.id == BYSProductIDs.yearly,
+              let period = product.subscription?.subscriptionPeriod,
+              period.unit == .year,
+              period.value == 1 else { return nil }
+        let monthly = product.price / 12
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = product.priceFormatStyle.currencyCode
+        formatter.maximumFractionDigits = 2
+        if let formatted = formatter.string(from: monthly as NSDecimalNumber) {
+            return "\(formatted)/mo"
+        }
+        return nil
     }
 }
 

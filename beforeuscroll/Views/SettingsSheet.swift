@@ -3,7 +3,8 @@ import SwiftUI
 struct SettingsSheet: View {
     @EnvironmentObject private var appState: BYSAppState
     @Environment(\.dismiss) private var dismiss
-    
+    @State private var presentedURL: BYSLinkSheetURL?
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -71,7 +72,10 @@ struct SettingsSheet: View {
                             #endif
                         }
                         
-                        Picker("Focus", selection: $appState.settings.selectedGoal) {
+                        Picker("Focus", selection: Binding(
+                            get: { appState.settings.selectedGoal },
+                            set: { appState.setSelectedGoal($0) }
+                        )) {
                             ForEach(ScrollGoal.allCases) { goal in
                                 Text(goal.title).tag(goal)
                             }
@@ -81,10 +85,14 @@ struct SettingsSheet: View {
                     }
                     
                     Section {
-                        Link(destination: AppLinks.privacy) {
+                        Button {
+                            presentedURL = BYSLinkSheetURL(url: AppLinks.privacy)
+                        } label: {
                             Label("Privacy Policy", systemImage: "hand.raised.fill")
                         }
-                        Link(destination: AppLinks.terms) {
+                        Button {
+                            presentedURL = BYSLinkSheetURL(url: AppLinks.terms)
+                        } label: {
                             Label("Terms & Conditions", systemImage: "doc.text.fill")
                         }
                         Link(destination: AppLinks.support) {
@@ -114,6 +122,9 @@ struct SettingsSheet: View {
                 }
             }
             .foregroundStyle(BYSTheme.text)
+            .sheet(item: $presentedURL) { item in
+                SafariWebSheet(url: item.url)
+            }
         }
     }
 }

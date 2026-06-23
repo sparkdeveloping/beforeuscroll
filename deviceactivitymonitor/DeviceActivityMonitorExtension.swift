@@ -68,6 +68,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
         guard selectionCount > 0 else {
             store.clearAllSettings()
+            BYSUnlockStore.saveDesiredProtectionEnabled(false)
             BYSUnlockStore.saveShieldCurrentlyApplied(false)
             debugLog("relock skipped: no selected apps")
             return

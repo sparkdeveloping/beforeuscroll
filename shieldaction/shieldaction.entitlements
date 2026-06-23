@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.sbj.beforeuscroll</string>
+		<string>group.com.denzeltinashe.beforeuscroll</string>
 	</array>
 </dict>
 </plist>

@@ -29,6 +29,7 @@ struct beforeuscrollApp: App {
                 .task {
                     await appState.configure()
                 }
+                .preferredColorScheme(.dark)
         }
     }
 }

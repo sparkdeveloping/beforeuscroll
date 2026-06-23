@@ -159,14 +159,14 @@ enum BYSFocusFlameStore {
     private static func dailyResetDate(for date: Date) -> Date {
         var components = calendar.dateComponents([.year, .month, .day, .hour], from: date)
         if let hour = components.hour, hour < 3 {
-            let yesterday = calendar.date(byAdding: .day, value: -1, to: date)!
+            let yesterday = calendar.date(byAdding: .day, value: -1, to: date) ?? date
             var yesterdayComponents = calendar.dateComponents([.year, .month, .day], from: yesterday)
             yesterdayComponents.hour = 3
-            return calendar.date(from: yesterdayComponents)!
+            return calendar.date(from: yesterdayComponents) ?? date
         } else {
             var todayComponents = calendar.dateComponents([.year, .month, .day], from: date)
             todayComponents.hour = 3
-            return calendar.date(from: todayComponents)!
+            return calendar.date(from: todayComponents) ?? date
         }
     }
 

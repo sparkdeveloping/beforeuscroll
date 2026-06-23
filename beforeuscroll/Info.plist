@@ -8,7 +8,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.sbj.beforeuscroll</string>
+			<string>com.denzeltinashe.beforeuscroll</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>beforeuscroll</string>

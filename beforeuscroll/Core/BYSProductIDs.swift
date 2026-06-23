@@ -1,13 +1,19 @@
 import Foundation
 
 enum BYSProductIDs {
-    static let monthly = "b4us.premium.monthly"
-    static let yearly = "b4us.premium.yearly"
-    static let weekly = "b4us.premium.weekly"
+    static let weekly = "com.bus.premium.weekly"
+    static let monthly = "com.bus.premium.monthly"
+    static let yearly = "com.bus.premium.yearly"
 
-    static let all = [
+    static let ordered = [
+        weekly,
         monthly,
-        yearly,
-        weekly
+        yearly
+    ]
+
+    static let all: Set<String> = [
+        weekly,
+        monthly,
+        yearly
     ]
 }

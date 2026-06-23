@@ -58,13 +58,8 @@ enum ProtectionStatus: Equatable {
 
 @MainActor
 final class BYSAppState: ObservableObject {
-    @Published var settings: UserSettings {
-        didSet { LocalStore.save(settings, for: .settings) }
-    }
-
-    @Published var sessions: [PauseSession] {
-        didSet { LocalStore.save(sessions, for: .sessions) }
-    }
+    @Published var settings: UserSettings
+    @Published var sessions: [PauseSession]
 
     @Published var isPaywallPresented = false
     @Published var activePauseTrigger: ActivePauseTrigger?
@@ -80,7 +75,7 @@ final class BYSAppState: ObservableObject {
     let storeKitService = StoreKitService.shared
 
     init() {
-        let loadedSettings = LocalStore.load(UserSettings.self, for: .settings) ?? .default
+        let loadedSettings = LocalStore.loadSettings() ?? .default
         self.settings = loadedSettings
         self.sessions = LocalStore.load([PauseSession].self, for: .sessions) ?? []
         self.focusFlame = BYSFocusFlameStore.snapshot(isPremium: loadedSettings.isPremium)
@@ -101,8 +96,14 @@ final class BYSAppState: ObservableObject {
     }
 
     func configure() async {
+        print("BYS bundle:", Bundle.main.bundleIdentifier ?? "nil")
+        print("BYS app version:", Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "nil", "build:", Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "nil")
+        print("BYS products requested:", BYSProductIDs.ordered)
+        BYSAppGroup.logAvailability()
+
         await storeKitService.configure()
-        settings.isPremium = storeKitService.isPremium
+        updatePremiumEntitlementFromStoreKit()
+        print("BYS premium entitlement:", settings.isPremium)
         
         // Sync Web Guard state to service
         screenTimeService.isWebGuardEnabled = settings.isWebGuardEnabled
@@ -113,12 +114,50 @@ final class BYSAppState: ObservableObject {
 
     func syncPremiumStatus() async {
         await storeKitService.updatePurchasedProducts()
-        settings.isPremium = storeKitService.isPremium
+        updatePremiumEntitlementFromStoreKit()
     }
 
     func completeOnboarding(goal: ScrollGoal) {
-        settings.selectedGoal = goal
+        finishOnboarding(selectedGoal: goal)
+    }
+
+    func finishOnboarding(selectedGoal: ScrollGoal) {
         settings.hasCompletedOnboarding = true
+        settings.selectedGoal = selectedGoal
+        saveSettingsSafely()
+        BYSVerseRotationStore.ensureQueueExists(for: selectedGoal)
+        recalculateHomeMode()
+    }
+
+    func saveSettingsSafely() {
+        LocalStore.saveSettings(settings)
+    }
+
+    private func updatePremiumEntitlementFromStoreKit() {
+        settings.isPremium = storeKitService.isPremium
+    }
+
+    private func saveSessionsSafely() {
+        LocalStore.save(sessions, for: .sessions)
+    }
+
+    private func recalculateHomeMode() {
+        refreshFocusFlame()
+        refreshProtectionStatus()
+    }
+
+    func markNotificationPermissionAsked() {
+        settings.notificationPermissionAsked = true
+        saveSettingsSafely()
+    }
+
+    func applyRestoredPremiumStatus(_ isPremium: Bool) {
+        settings.isPremium = isPremium
+    }
+
+    func setSelectedGoal(_ goal: ScrollGoal) {
+        settings.selectedGoal = goal
+        saveSettingsSafely()
     }
 
     func prepareForRecharge() {
@@ -143,6 +182,7 @@ final class BYSAppState: ObservableObject {
 
     func savePauseSession(_ session: PauseSession) {
         sessions.insert(session, at: 0)
+        saveSessionsSafely()
 
         if session.passedQuiz {
             VerseProgressStore.markCompleted(verseID: session.verseID, for: settings.selectedGoal)
@@ -217,6 +257,7 @@ final class BYSAppState: ObservableObject {
 
     func setWebGuardEnabled(_ enabled: Bool) {
         settings.isWebGuardEnabled = enabled
+        saveSettingsSafely()
         screenTimeService.isWebGuardEnabled = enabled
         Task {
             await screenTimeService.reconcileShieldState()
@@ -225,6 +266,7 @@ final class BYSAppState: ObservableObject {
     
     func setAdultFilterEnabled(_ enabled: Bool) {
         settings.isAdultFilterEnabled = enabled
+        saveSettingsSafely()
         screenTimeService.isAdultFilterEnabled = enabled
         Task {
             await screenTimeService.reconcileShieldState()

@@ -7,6 +7,7 @@ struct UserSettings: Codable, Equatable {
     var isPremium: Bool
     var isWebGuardEnabled: Bool
     var isAdultFilterEnabled: Bool
+    var notificationPermissionAsked: Bool
 
     static let `default` = UserSettings(
         hasCompletedOnboarding: false,
@@ -14,8 +15,54 @@ struct UserSettings: Codable, Equatable {
         defaultUnlockMinutes: 10,
         isPremium: false,
         isWebGuardEnabled: false,
-        isAdultFilterEnabled: false
+        isAdultFilterEnabled: false,
+        notificationPermissionAsked: false
     )
+}
+
+extension PersistedSettings {
+    init(settings: UserSettings) {
+        self.init(
+            hasCompletedOnboarding: settings.hasCompletedOnboarding,
+            selectedGoalRawValue: settings.selectedGoal.rawValue,
+            isProtectionEnabled: false,
+            selectedThemeRawValue: nil,
+            notificationPermissionAsked: settings.notificationPermissionAsked,
+            isWebGuardEnabled: settings.isWebGuardEnabled,
+            isAdultFilterEnabled: settings.isAdultFilterEnabled,
+            defaultUnlockMinutes: settings.defaultUnlockMinutes
+        )
+    }
+}
+
+extension UserSettings {
+    init(persisted: PersistedSettings) {
+        self.init(
+            hasCompletedOnboarding: persisted.hasCompletedOnboarding,
+            selectedGoal: ScrollGoal(rawValue: persisted.selectedGoalRawValue) ?? .doomscrolling,
+            defaultUnlockMinutes: persisted.defaultUnlockMinutes,
+            isPremium: false,
+            isWebGuardEnabled: persisted.isWebGuardEnabled,
+            isAdultFilterEnabled: persisted.isAdultFilterEnabled,
+            notificationPermissionAsked: persisted.notificationPermissionAsked
+        )
+    }
+}
+
+extension LocalStore {
+    static func saveSettings(_ settings: UserSettings) {
+        save(PersistedSettings(settings: settings), for: .settings)
+    }
+
+    static func loadSettings() -> UserSettings? {
+        guard let data = BYSAppGroup.defaults.data(forKey: LocalStoreKey.settings.rawValue) else { return nil }
+
+        if let persisted = try? BYSPersistence.decode(PersistedSettings.self, from: data, label: LocalStoreKey.settings.rawValue) {
+            return UserSettings(persisted: persisted)
+        }
+
+        return try? BYSPersistence.decode(UserSettings.self, from: data, label: "\(LocalStoreKey.settings.rawValue).legacy")
+    }
 }
 
 enum ScrollGoal: String, CaseIterable, Codable, Identifiable {

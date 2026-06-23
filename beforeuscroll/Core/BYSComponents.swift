@@ -1,4 +1,5 @@
 import SwiftUI
+import SafariServices
 
 struct BYSCard<Content: View>: View {
     var padding: CGFloat = 18
@@ -187,4 +188,22 @@ extension View {
     func subtleGlow(radius: CGFloat, opacity: Double) -> some View {
         self.shadow(color: Color.white.opacity(opacity), radius: radius)
     }
+}
+
+// Wraps SFSafariViewController for in-app web presentation required by App Review.
+struct SafariWebSheet: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        let vc = SFSafariViewController(url: url)
+        vc.preferredControlTintColor = UIColor(red: 1.0, green: 0.72, blue: 0.42, alpha: 1.0)
+        return vc
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
+}
+
+struct BYSLinkSheetURL: Identifiable {
+    let id = UUID()
+    let url: URL
 }

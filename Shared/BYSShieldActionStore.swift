@@ -84,7 +84,7 @@ enum BYSShieldActionStore {
             lastNotificationScheduled: BYSAppGroup.defaults.bool(forKey: lastNotificationScheduledKey),
             lastAppActiveDate: BYSAppGroup.defaults.object(forKey: lastAppActiveDateKey) as? Date,
             lastPendingPauseConsumedDate: BYSAppGroup.defaults.object(forKey: lastPendingPauseConsumedDateKey) as? Date,
-            appGroupID: BYSAppGroup.id
+            appGroupID: BYSAppGroup.identifier
         )
     }
 

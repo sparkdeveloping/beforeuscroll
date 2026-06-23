@@ -13,9 +13,65 @@ enum BYSQuestionKind: String, Codable, Equatable {
     case typedText
 }
 
+enum BYSQuizQuestionType: String, Codable, Equatable {
+    case reference
+    case keyPhrase
+    case meaning
+    case application
+}
+
+struct BYSScriptureQuestionSession {
+    static func build(for verse: Verse) -> [ShuffledQuizQuestion] {
+        var result: [ShuffledQuizQuestion] = []
+        let allQuestions = verse.quiz
+        
+        // Group by type
+        let referenceQs = allQuestions.filter { $0.type == .reference && !$0.isTrickQuestion }
+        let keyPhraseQs = allQuestions.filter { $0.type == .keyPhrase && !$0.isTrickQuestion }
+        let meaningQs = allQuestions.filter { $0.type == .meaning && !$0.isTrickQuestion }
+        let applicationQs = allQuestions.filter { $0.type == .application && !$0.isTrickQuestion }
+        let trickQs = allQuestions.filter { $0.isTrickQuestion }
+        
+        // Ensure at least one of each required type if available
+        if let q = referenceQs.shuffled().first { result.append(q.shuffledForSession()) }
+        if let q = keyPhraseQs.shuffled().first { result.append(q.shuffledForSession()) }
+        if let q = meaningQs.shuffled().first { result.append(q.shuffledForSession()) }
+        if let q = applicationQs.shuffled().first { result.append(q.shuffledForSession()) }
+        if let q = trickQs.shuffled().first { result.append(q.shuffledForSession()) }
+        
+        // If we still need more to reach 5, pick from the remaining pool
+        let usedIDs = Set(result.map { $0.id })
+        let remainingPool = allQuestions.filter { !usedIDs.contains($0.id) }
+        
+        let remainingNeeded = 5 - result.count
+        if remainingNeeded > 0 {
+            let extraQs = remainingPool.shuffled()
+            for i in 0..<Swift.min(remainingNeeded, extraQs.count) {
+                result.append(extraQs[i].shuffledForSession())
+            }
+        }
+        
+        var shuffledResult = result.shuffled()
+        
+        // Prevent same first question as last time if possible
+        if let lastFirstID = BYSVerseRotationStore.lastFirstQuestionID(for: verse.id),
+           shuffledResult.count > 1,
+           shuffledResult.first?.id == lastFirstID {
+            shuffledResult.shuffle()
+        }
+        
+        if let firstID = shuffledResult.first?.id {
+            BYSVerseRotationStore.setLastFirstQuestionID(firstID, for: verse.id)
+        }
+        
+        return shuffledResult
+    }
+}
+
 struct VerseQuizQuestion: Identifiable, Codable, Equatable {
     var id: String
     var kind: BYSQuestionKind
+    var type: BYSQuizQuestionType
     var prompt: String
     var options: [String] = []
     var correctIndex: Int?
@@ -32,6 +88,7 @@ struct VerseQuizQuestion: Identifiable, Codable, Equatable {
 struct ShuffledQuizQuestion: Identifiable, Equatable {
     let id: String
     let kind: BYSQuestionKind
+    let type: BYSQuizQuestionType
     let prompt: String
     let options: [String]
     let correctIndex: Int?
@@ -86,6 +143,7 @@ extension VerseQuizQuestion {
         return ShuffledQuizQuestion(
             id: id,
             kind: kind,
+            type: type,
             prompt: prompt,
             options: shuffledOptions,
             correctIndex: remappedCorrectIndex,

@@ -80,9 +80,12 @@ struct HomeView: View {
 
                     Spacer()
                     
-                    statsPanel
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 24)
+                    VStack(spacing: 12) {
+                        statsPanel
+                        nextVersePreview
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
 
                     // Action Area
                     VStack(spacing: 16) {
@@ -98,7 +101,7 @@ struct HomeView: View {
                 appState.refreshProtectionStatus()
             }
             .sheet(isPresented: $showVerseCheck) {
-                PauseFlowView(trigger: .voluntary)
+                PauseFlowView(trigger: .voluntary, goal: appState.settings.selectedGoal)
                     .environmentObject(appState)
             }
             .sheet(isPresented: $showSettings) {
@@ -283,6 +286,34 @@ struct HomeView: View {
                 .foregroundStyle(BYSTheme.textFaint)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var nextVersePreview: some View {
+        BYSGlassCard(padding: 16, cornerRadius: 24) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Next Verse")
+                        .font(.caption.weight(.black))
+                        .foregroundStyle(BYSTheme.gold)
+                        .tracking(1.0)
+                    Spacer()
+                    Image(systemName: "book.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(BYSTheme.textFaint)
+                }
+                
+                let verse = VerseLibrary.currentVerseOfStudy(for: appState.settings.selectedGoal)
+                Text(verse.text)
+                    .font(.system(size: 15, weight: .medium, design: .serif))
+                    .foregroundStyle(BYSTheme.text)
+                    .lineLimit(2)
+                    .lineSpacing(2)
+                
+                Text(verse.reference)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(appState.currentFlameTheme.secondary)
+            }
+        }
     }
 
     @ViewBuilder

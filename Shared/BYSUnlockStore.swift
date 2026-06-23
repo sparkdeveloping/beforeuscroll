@@ -38,7 +38,7 @@ enum BYSUnlockStore {
 
     static func loadDesiredProtectionEnabled() -> Bool {
         guard BYSAppGroup.defaults.object(forKey: desiredProtectionEnabledKey) != nil else {
-            return true
+            return false
         }
 
         return BYSAppGroup.defaults.bool(forKey: desiredProtectionEnabledKey)
