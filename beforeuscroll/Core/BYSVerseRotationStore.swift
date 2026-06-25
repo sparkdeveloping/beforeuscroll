@@ -12,18 +12,34 @@ enum BYSVerseRotationStore {
     static func currentVerse(for category: VerseCategory) -> Verse {
         var state = loadState()
         let categoryKey = category.rawValue
-        
+
         let queue = getOrInitializeQueue(for: category, in: &state)
+
+        // Safety net: if the category has no verses, return any available verse.
+        // Prevents EXC_BREAKPOINT on queue[index] with an empty array.
+        guard !queue.isEmpty else {
+            print("[BeforeUScroll][VerseStore] no verses for category '\(categoryKey)' — using discipline fallback")
+            return VerseLibrary.verses.first(where: { $0.category == .discipline })
+                ?? VerseLibrary.verses.first
+                ?? Verse(id: "fallback", reference: "Psalm 46:10",
+                         text: "Be still, and know that I am God.",
+                         category: .discipline, quiz: [])
+        }
+
         var index = state.indicesByCategory[categoryKey] ?? 0
-        
+
         if index >= queue.count {
             state.indicesByCategory[categoryKey] = 0
             saveState(state)
             index = 0
         }
-        
+
         let verseID = queue[index]
-        return VerseLibrary.verses.first(where: { $0.id == verseID }) ?? VerseLibrary.verses[0]
+        return VerseLibrary.verses.first(where: { $0.id == verseID })
+            ?? VerseLibrary.verses.first
+            ?? Verse(id: "fallback", reference: "Psalm 46:10",
+                     text: "Be still, and know that I am God.",
+                     category: .discipline, quiz: [])
     }
 
     static func ensureQueueExists(for goal: ScrollGoal) {

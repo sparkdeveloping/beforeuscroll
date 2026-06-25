@@ -133,7 +133,11 @@ struct HomeView: View {
                     }
                 }
             }
+            .onAppear {
+                print("[BeforeUScroll][Home] first frame appeared")
+            }
             .task {
+                // reconcileShieldState is async-safe here — runs after first frame renders.
                 await screenTimeService.reconcileShieldState()
                 appState.refreshProtectionStatus()
             }

@@ -633,7 +633,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = beforeuscroll/beforeuscroll.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -672,7 +672,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = beforeuscroll/beforeuscroll.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -709,7 +709,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shieldconfiguration/shieldconfiguration.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = shieldconfiguration/Info.plist;
@@ -739,7 +739,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shieldconfiguration/shieldconfiguration.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = shieldconfiguration/Info.plist;
@@ -769,7 +769,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shieldaction/shieldaction.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = shieldaction/Info.plist;
@@ -799,7 +799,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shieldaction/shieldaction.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = shieldaction/Info.plist;
@@ -829,7 +829,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = deviceactivitymonitor/deviceactivitymonitor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = deviceactivitymonitor/Info.plist;
@@ -859,7 +859,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = deviceactivitymonitor/deviceactivitymonitor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = NDX8XU8XCV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = deviceactivitymonitor/Info.plist;

@@ -132,7 +132,7 @@ struct OnboardingView: View {
                 .padding(.bottom, 20)
             }
             
-            if let selectedGoal {
+            if selectedGoal != nil {
                 BYSPrimaryButton(title: "Continue", systemImage: "arrow.right") {
                     goToNextPage()
                 }
@@ -212,9 +212,9 @@ struct OnboardingView: View {
             Spacer()
             
             BYSPrimaryButton(title: "Enter App", systemImage: "checkmark.circle.fill") {
-                if let goal = selectedGoal {
-                    appState.completeOnboarding(goal: goal)
-                }
+                let goal = selectedGoal ?? .doomscrolling
+                print("[BeforeUScroll][Onboarding] Enter App button tapped, selectedGoal:", goal.rawValue)
+                appState.completeOnboarding(goal: goal)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)

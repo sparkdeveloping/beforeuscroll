@@ -122,11 +122,35 @@ final class BYSAppState: ObservableObject {
     }
 
     func finishOnboarding(selectedGoal: ScrollGoal) {
+        print("[BeforeUScroll][Onboarding] Enter App tapped — selectedGoal:", selectedGoal.rawValue)
+
+        print("[BeforeUScroll][Onboarding] save settings start")
         settings.hasCompletedOnboarding = true
         settings.selectedGoal = selectedGoal
+        settings.notificationPermissionAsked = true
         saveSettingsSafely()
+        print("[BeforeUScroll][Onboarding] save settings complete")
+
+        print("[BeforeUScroll][Onboarding] ensuring verse queue for goal:", selectedGoal.rawValue)
         BYSVerseRotationStore.ensureQueueExists(for: selectedGoal)
+
+        print("[BeforeUScroll][Onboarding] route home start")
         recalculateHomeMode()
+        print("[BeforeUScroll][Onboarding] route home complete")
+
+        // All heavy async work runs after the first Home frame renders.
+        Task {
+            await bootstrapAfterOnboarding()
+        }
+    }
+
+    func bootstrapAfterOnboarding() async {
+        print("[BeforeUScroll][Home] bootstrap start")
+        await screenTimeService.reconcileShieldState()
+        await syncPremiumStatus()
+        refreshFocusFlame()
+        refreshProtectionStatus()
+        print("[BeforeUScroll][Home] bootstrap complete")
     }
 
     func saveSettingsSafely() {
